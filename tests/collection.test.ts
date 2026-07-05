@@ -3,7 +3,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { scanRequests, resolveRequest, resolveCollectionRoot } from "../src/collection.js";
-import { BrunoMcpError } from "../src/errors.js";
 
 describe("Collection Discovery & Resolution", () => {
   let tempDir: string;
