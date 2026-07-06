@@ -2,8 +2,6 @@
 
 A local-first, secure **Model Context Protocol (MCP)** server that enables AI coding assistants (like Cursor, Claude Desktop, and Aider) to discover, inspect, and run API requests in your **Bruno** collections entirely locally.
 
-![Bruno MCP Server Demo](./docs/images/demo.gif)
-
 ---
 
 ## Key Features
@@ -55,6 +53,22 @@ Add this to your `claude_desktop_config.json`:
   }
 }
 ```
+
+## Try the Self-Healing Demo
+
+To see the AI agent automatically debug and heal code using this MCP server:
+
+1. **Start the Mock Server**:
+   ```bash
+   node fixtures/demo/server.js
+   ```
+2. **Introduce a Bug**:
+   Open `fixtures/demo/server.js` and change `payload.email` to `payload.mail` on line 21.
+3. **Ask the AI**:
+   In Cursor or Claude, ask:
+   > *"I just modified the register endpoint in fixtures/demo/server.js. Please use the Bruno MCP tool to run the 'Register' request in fixtures/demo/ to check if it passes."*
+4. **Watch it Heal**:
+   The AI agent will call the MCP tool, detect the `400` failure, inspect `server.js`, fix the typo back to `payload.email`, re-run the request, and confirm the test passes!
 
 ---
 
