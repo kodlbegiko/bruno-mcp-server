@@ -2,9 +2,7 @@
 
 A local-first, secure **Model Context Protocol (MCP)** server that enables AI coding assistants (like Cursor, Claude Desktop, and Aider) to discover, inspect, and run API requests in your **Bruno** collections entirely locally.
 
-<p align="center">
-  <video src="./assets/demo.mov" width="100%" autoplay loop muted></video>
-</p>
+![Bruno MCP Server self-healing demo](./docs/images/demo.gif)
 
 ---
 
@@ -23,11 +21,16 @@ A local-first, secure **Model Context Protocol (MCP)** server that enables AI co
 - Node.js >= 20.0.0
 - A Bruno collection initialized in your workspace.
 
-### Running with npx
-You can boot the server directly via `npx`:
+### Running from source
+
+The npm package name `bruno-mcp-server` is currently owned by another project. Clone this repository to ensure you run this implementation:
 
 ```bash
-npx bruno-mcp-server --project-path /absolute/path/to/your/bruno-collection
+git clone https://github.com/kodlbegiko/bruno-mcp-server.git
+cd bruno-mcp-server
+npm ci
+npm run build
+node dist/index.js --project-path /absolute/path/to/your/bruno-collection
 ```
 
 ---
@@ -67,7 +70,7 @@ To see the AI agent automatically debug and heal code using this MCP server:
    node fixtures/demo/server.js
    ```
 2. **Introduce a Bug**:
-   Open `fixtures/demo/server.js` and change `payload.email` to `payload.mail` on line 21.
+   Open `fixtures/demo/server.js` and change `payload.email` to `payload.mail` in the registration handler.
 3. **Ask the AI**:
    In Cursor or Claude, ask:
    > *"I just modified the register endpoint in fixtures/demo/server.js. Please use the Bruno MCP tool to run the 'Register' request in fixtures/demo/ to check if it passes."*
