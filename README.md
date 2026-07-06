@@ -2,6 +2,10 @@
 
 A local-first, secure **Model Context Protocol (MCP)** server that enables AI coding assistants (like Cursor, Claude Desktop, and Aider) to discover, inspect, and run API requests in your **Bruno** collections entirely locally.
 
+<p align="center">
+  <video src="./assets/demo.mov" width="100%" autoplay loop muted></video>
+</p>
+
 ---
 
 ## Key Features
