@@ -196,7 +196,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-paper-50 dark:bg-stone-900 safe-top safe-bottom select-none transition-colors">
+    <div className="flex flex-col min-h-[100dvh] bg-paper-50 dark:bg-stone-900 safe-top safe-bottom select-none transition-colors">
       {/* Top Header */}
       <header className="px-4 py-3 sm:py-4 flex items-center justify-between border-b border-paper-border/60 dark:border-stone-800 bg-paper-50/90 dark:bg-stone-900/90 backdrop-blur-sm sticky top-0 z-30">
         <button

@@ -140,7 +140,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-paper-50 dark:bg-stone-900 text-ink-900 dark:text-stone-100 font-sans transition-colors">
+    <div className="w-full min-h-[100dvh] bg-paper-50 dark:bg-stone-900 text-ink-900 dark:text-stone-100 font-sans transition-colors">
       <OfflineBanner />
       <LiveAnnouncer />
       {currentRoute === 'home' && (
@@ -161,7 +161,7 @@ export const App: React.FC = () => {
       {currentRoute === 'online-lobby' && (
         <Suspense
           fallback={
-            <div className="min-h-screen bg-paper-50 flex items-center justify-center font-serif text-ink-600">
+            <div className="min-h-[100dvh] bg-paper-50 flex items-center justify-center font-serif text-ink-600">
               載入連線大廳...
             </div>
           }
@@ -177,7 +177,7 @@ export const App: React.FC = () => {
       {currentRoute === 'online-waiting' && (
         <Suspense
           fallback={
-            <div className="min-h-screen bg-paper-50 flex items-center justify-center font-serif text-ink-600">
+            <div className="min-h-[100dvh] bg-paper-50 flex items-center justify-center font-serif text-ink-600">
               載入候車室...
             </div>
           }

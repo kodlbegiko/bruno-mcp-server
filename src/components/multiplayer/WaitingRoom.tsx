@@ -34,7 +34,7 @@ export const WaitingRoom: React.FC<WaitingRoomProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-paper-50 dark:bg-stone-900 flex flex-col justify-between px-4 py-6 sm:py-10 safe-top safe-bottom max-w-md mx-auto w-full transition-colors">
+    <div className="min-h-[100dvh] bg-paper-50 dark:bg-stone-900 flex flex-col justify-between px-4 py-6 sm:py-10 safe-top safe-bottom max-w-md mx-auto w-full transition-colors">
       {/* Top Header */}
       <header className="flex items-center justify-between pb-3 border-b border-paper-border/60 dark:border-stone-800">
         <button

@@ -19,7 +19,7 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
 
   if (!gameState) {
     return (
-      <div className="min-h-screen bg-paper-50 dark:bg-stone-900 flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-[100dvh] bg-paper-50 dark:bg-stone-900 flex flex-col items-center justify-center p-6 text-center">
         <p className="text-ink-600 dark:text-stone-300 font-serif mb-4">沒有結束的對話資料</p>
         <Button variant="primary" onClick={onBackToHome}>
           {t('ending.back_to_home')}
@@ -82,7 +82,7 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
   };
 
   return (
-    <div className="min-h-screen bg-paper-50 dark:bg-stone-900 flex flex-col justify-between px-4 py-8 sm:py-12 safe-top safe-bottom max-w-md mx-auto w-full text-center transition-colors">
+    <div className="min-h-[100dvh] bg-paper-50 dark:bg-stone-900 flex flex-col justify-between px-4 py-8 sm:py-12 safe-top safe-bottom max-w-md mx-auto w-full text-center transition-colors">
       {/* Decorative Symbol */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}

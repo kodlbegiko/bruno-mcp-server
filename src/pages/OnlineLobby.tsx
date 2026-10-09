@@ -84,7 +84,7 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-paper-50 flex flex-col justify-between px-4 py-5 sm:py-8 safe-top safe-bottom max-w-md mx-auto w-full">
+    <div className="min-h-[100dvh] bg-paper-50 flex flex-col justify-between px-4 py-5 sm:py-8 safe-top safe-bottom max-w-md mx-auto w-full">
       {/* Top Header */}
       <header className="flex items-center justify-between pb-3 border-b border-paper-border/60">
         <button

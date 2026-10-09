@@ -39,7 +39,7 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-paper-50 dark:bg-stone-900 flex items-center justify-center p-6 text-ink-900 dark:text-stone-100 font-sans transition-colors">
+        <div className="min-h-[100dvh] bg-paper-50 dark:bg-stone-900 flex items-center justify-center p-6 text-ink-900 dark:text-stone-100 font-sans transition-colors">
           <div className="max-w-md w-full bg-paper-100 dark:bg-stone-850 rounded-3xl p-6 sm:p-8 border border-paper-border dark:border-stone-700 shadow-xl text-center space-y-5">
             <div className="w-14 h-14 rounded-full bg-paper-200 dark:bg-stone-750 text-ink-700 dark:text-stone-300 flex items-center justify-center mx-auto text-2xl shadow-inner">
               ☕

@@ -42,7 +42,7 @@ export const Home: React.FC<HomeProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-paper-50 dark:bg-stone-900 flex flex-col justify-between px-4 py-6 sm:py-10 safe-top safe-bottom transition-colors">
+    <div className="min-h-[100dvh] bg-paper-50 dark:bg-stone-900 flex flex-col justify-between px-4 py-6 sm:py-10 safe-top safe-bottom transition-colors">
       {/* Top Header Actions */}
       <header className="flex justify-between items-center max-w-md mx-auto w-full">
         <button
