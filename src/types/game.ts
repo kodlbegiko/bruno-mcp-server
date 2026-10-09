@@ -33,6 +33,7 @@ export interface GameState {
   threeStarConsentSeen: boolean;
   cardsDrawnCount: number;
   historyCardIds?: string[];
+  revealedCardIds?: string[];
   status: 'playing' | 'ended';
   endedAt?: number;
 }

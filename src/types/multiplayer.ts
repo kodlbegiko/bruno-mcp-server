@@ -51,11 +51,22 @@ export interface JoinRequestPayload {
   playerName: string;
 }
 
+export interface ThreeStarConsentState {
+  status: 'pending' | 'accepted' | 'declined';
+  requiredPlayerIds: string[];
+  acceptedPlayerIds: string[];
+  declinedPlayerIds: string[];
+}
+
 export interface JoinAcceptedPayload {
   myPlayerId: string;
   roomCode: string;
   players: OnlinePlayer[];
   gameState?: GameState | null;
+  isCardFlipped?: boolean;
+  selectedPlayerIds?: string[];
+  showThreeStarConsent?: boolean;
+  threeStarConsent?: ThreeStarConsentState | null;
 }
 
 export interface SyncStatePayload {
@@ -63,4 +74,5 @@ export interface SyncStatePayload {
   isCardFlipped: boolean;
   selectedPlayerIds: string[];
   showThreeStarConsent?: boolean;
+  threeStarConsent?: ThreeStarConsentState | null;
 }

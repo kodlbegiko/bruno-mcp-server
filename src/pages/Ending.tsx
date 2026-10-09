@@ -54,9 +54,30 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
   const endedTime = gameState.endedAt || Date.now();
   const elapsedMinutes = Math.max(1, Math.round((endedTime - gameState.startedAt) / (60 * 1000)));
 
-  // Calculate highest level reached
+  // Calculate cards revealed count
+  const revealedCount =
+    (gameState.revealedCardIds && gameState.revealedCardIds.length > 0)
+      ? gameState.revealedCardIds.length
+      : gameState.cardsDrawnCount;
+
+  // Calculate highest level actually revealed
   const levelsPlayed = (['three-star', 'two-star', 'one-star', 'icebreaker'] as const);
-  const highestLevel = levelsPlayed.find((lvl) => gameState.decks[lvl].cursor > 0) || 'icebreaker';
+  const revealedLevels = (gameState.revealedCardIds || [])
+    .map((id) => {
+      // Find level from deck cards
+      if (id.startsWith('ice-')) return 'icebreaker';
+      if (id.startsWith('one-')) return 'one-star';
+      if (id.startsWith('two-')) return 'two-star';
+      if (id.startsWith('three-')) return 'three-star';
+      return null;
+    })
+    .filter((lvl): lvl is (typeof levelsPlayed)[number] => !!lvl);
+
+  const highestLevel =
+    levelsPlayed.find((lvl) => revealedLevels.includes(lvl)) ||
+    levelsPlayed.find((lvl) => gameState.decks[lvl].cursor > 0) ||
+    gameState.currentLevel ||
+    'icebreaker';
   const highestLevelInfo = LEVEL_NAMES[highestLevel];
 
   const handlePlayAgain = () => {
@@ -77,8 +98,8 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
       ? 'Deeply Know Someone · Conversation Session'
       : '深刻認識一個人 · 對話紀錄';
     const shareText = isEn
-      ? `Deeply Know Someone · Session Record ✨\nWe spent ${elapsedMinutes} minutes in deep dialogue, drew ${gameState.cardsDrawnCount} cards, and reached the [${highestLevelInfo.en}] depth.\n"Thank you for being open and truly listening."\n👉 Try online: https://deeply-know-someone.vercel.app`
-      : `深刻認識一個人 · 對話紀錄 ✨\n我們完成了 ${elapsedMinutes} 分鐘的深入對話，翻開了 ${gameState.cardsDrawnCount} 張卡牌，到達了【${highestLevelInfo.zh}】深度。\n「謝謝彼此的坦誠與聆聽。」\n👉 線上體驗：https://deeply-know-someone.vercel.app`;
+      ? `Deeply Know Someone · Session Record ✨\nWe spent ${elapsedMinutes} minutes in deep dialogue, drew ${revealedCount} cards, and reached the [${highestLevelInfo.en}] depth.\n"Thank you for being open and truly listening."\n👉 Try online: https://deeply-know-someone.vercel.app`
+      : `深刻認識一個人 · 對話紀錄 ✨\n我們完成了 ${elapsedMinutes} 分鐘的深入對話，翻開了 ${revealedCount} 張卡牌，到達了【${highestLevelInfo.zh}】深度。\n「謝謝彼此的坦誠與聆聽。」\n👉 線上體驗：https://deeply-know-someone.vercel.app`;
     const shareUrl = 'https://deeply-know-someone.vercel.app';
 
     if (typeof navigator !== 'undefined' && navigator.share) {
@@ -173,7 +194,7 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
               {t('ending.cards_drawn')}
             </span>
             <span className="text-xl font-serif font-semibold text-ink-900 dark:text-stone-100">
-              {gameState.cardsDrawnCount} 張
+              {revealedCount} 張
             </span>
           </div>
 

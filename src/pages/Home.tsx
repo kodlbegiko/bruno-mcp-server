@@ -27,6 +27,7 @@ export const Home: React.FC<HomeProps> = ({
   const [showRules, setShowRules] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showConfirmNew, setShowConfirmNew] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'quick' | 'custom' | null>(null);
 
   useEffect(() => {
     resetSessionTimer();
@@ -37,6 +38,7 @@ export const Home: React.FC<HomeProps> = ({
 
   const handleQuickStart = () => {
     if (hasActiveGame) {
+      setPendingAction('quick');
       setShowConfirmNew(true);
     } else {
       trackEvent('quick_start');
@@ -47,6 +49,7 @@ export const Home: React.FC<HomeProps> = ({
 
   const handleNewGameClick = () => {
     if (hasActiveGame) {
+      setPendingAction('custom');
       setShowConfirmNew(true);
     } else {
       trackEvent('custom_setup_start');
@@ -55,9 +58,18 @@ export const Home: React.FC<HomeProps> = ({
   };
 
   const handleConfirmNewGame = () => {
+    const action = pendingAction;
     resetGame();
     setShowConfirmNew(false);
-    onStartNewGame();
+    setPendingAction(null);
+    if (action === 'quick') {
+      trackEvent('quick_start');
+      trackEvent('shared_device_start');
+      onQuickStart();
+    } else {
+      trackEvent('custom_setup_start');
+      onStartNewGame();
+    }
   };
 
   return (
@@ -276,7 +288,10 @@ export const Home: React.FC<HomeProps> = ({
                 variant="ghost"
                 size="sm"
                 fullWidth
-                onClick={() => setShowConfirmNew(false)}
+                onClick={() => {
+                  setShowConfirmNew(false);
+                  setPendingAction(null);
+                }}
               >
                 保留上次
               </Button>

@@ -37,12 +37,15 @@ interface GameStore {
   resetGame: () => void;
 }
 
-function initializeDecks(): GameState['decks'] {
+function initializeDecks(playerCount?: number): GameState['decks'] {
+  const filterByPlayerCount = (cards: { id: string; minPlayers?: number }[]) =>
+    playerCount ? cards.filter((c) => !c.minPlayers || playerCount >= c.minPlayers) : cards;
+
   return {
-    icebreaker: createShuffledDeck(deckCards.icebreaker.map((c) => c.id)),
-    'one-star': createShuffledDeck(deckCards['one-star'].map((c) => c.id)),
-    'two-star': createShuffledDeck(deckCards['two-star'].map((c) => c.id)),
-    'three-star': createShuffledDeck(deckCards['three-star'].map((c) => c.id)),
+    icebreaker: createShuffledDeck(filterByPlayerCount(deckCards.icebreaker).map((c) => c.id)),
+    'one-star': createShuffledDeck(filterByPlayerCount(deckCards['one-star']).map((c) => c.id)),
+    'two-star': createShuffledDeck(filterByPlayerCount(deckCards['two-star']).map((c) => c.id)),
+    'three-star': createShuffledDeck(filterByPlayerCount(deckCards['three-star']).map((c) => c.id)),
   };
 }
 
@@ -56,11 +59,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
   selectedPlayerIds: [],
 
   initGame: (players, mode, sessionGoalMinutes, startingLevel) => {
-    const decks = initializeDecks();
+    const playerCount = players.length;
+    const decks = initializeDecks(playerCount);
     const startLevel: CardLevel = mode === 'free' && startingLevel ? startingLevel : 'icebreaker';
-    const deck = decks[startLevel];
-    const initialCardId = deck.shuffledIds.length > 0 ? deck.shuffledIds[0] : null;
     const isThreeStarStart = startLevel === 'three-star';
+    const deck = decks[startLevel];
+    // If starting directly on three-star, do not consume or draw card until consent is validated!
+    const initialCardId = isThreeStarStart
+      ? null
+      : deck.shuffledIds.length > 0
+      ? deck.shuffledIds[0]
+      : null;
 
     const newGameState: GameState = {
       version: 1,
@@ -78,15 +87,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentSelection: { selectedPlayerIds: [] },
       decks: {
         ...decks,
-        [startLevel]: {
-          ...deck,
-          cursor: 1,
-          usedIds: initialCardId ? [initialCardId] : [],
-        },
+        ...(isThreeStarStart
+          ? {}
+          : {
+              [startLevel]: {
+                ...deck,
+                cursor: initialCardId ? 1 : 0,
+                usedIds: initialCardId ? [initialCardId] : [],
+              },
+            }),
       },
       threeStarConsentSeen: false,
       cardsDrawnCount: initialCardId ? 1 : 0,
-      historyCardIds: initialCardId ? [initialCardId] : [],
+      historyCardIds: [],
+      revealedCardIds: [],
       status: 'playing',
     };
 
@@ -116,7 +130,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   flipCard: () => {
-    set({ isCardFlipped: true });
+    const state = get().gameState;
+    if (!state || !state.currentCardId) {
+      set({ isCardFlipped: true });
+      return;
+    }
+
+    const currentCardId = state.currentCardId;
+    const revealed = state.revealedCardIds || [];
+    const history = state.historyCardIds || [];
+    const updatedRevealed = revealed.includes(currentCardId)
+      ? revealed
+      : [...revealed, currentCardId];
+    const updatedHistory = history.includes(currentCardId)
+      ? history
+      : [...history, currentCardId];
+
+    const updatedState: GameState = {
+      ...state,
+      revealedCardIds: updatedRevealed,
+      historyCardIds: updatedHistory,
+    };
+
+    saveGameState(updatedState);
+    set({
+      gameState: updatedState,
+      isCardFlipped: true,
+    });
   },
 
   drawNextCard: () => {
@@ -146,14 +186,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const nextCardId = deck.shuffledIds[nextCursor];
     const nextDrawerIndex = (state.drawerIndex + 1) % state.players.length;
 
-    const history = state.historyCardIds || [];
     const updatedState: GameState = {
       ...state,
       drawerIndex: nextDrawerIndex,
       currentCardId: nextCardId,
       currentSelection: { selectedPlayerIds: [] },
       cardsDrawnCount: state.cardsDrawnCount + 1,
-      historyCardIds: [...history, nextCardId],
       decks: {
         ...state.decks,
         [currentLevel]: {
@@ -198,14 +236,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const nextCardId = deck.shuffledIds[nextCursor];
     // Keep drawerIndex unchanged: the same player draws the replacement card!
-    const history = state.historyCardIds || [];
     const updatedState: GameState = {
       ...state,
       // drawerIndex remains unchanged
       currentCardId: nextCardId,
       currentSelection: { selectedPlayerIds: [] },
       cardsDrawnCount: state.cardsDrawnCount + 1,
-      historyCardIds: [...history, nextCardId],
       decks: {
         ...state.decks,
         [currentLevel]: {
@@ -258,8 +294,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     const nextDrawerIndex = (state.drawerIndex + 1) % state.players.length;
-    const history = state.historyCardIds || [];
-    const shouldAddToHistory = nextCardId && !history.includes(nextCardId);
 
     const updatedState: GameState = {
       ...state,
@@ -268,7 +302,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentCardId: nextCardId,
       currentSelection: { selectedPlayerIds: [] },
       cardsDrawnCount: nextCardId ? state.cardsDrawnCount + 1 : state.cardsDrawnCount,
-      historyCardIds: shouldAddToHistory && nextCardId ? [...history, nextCardId] : history,
       decks: {
         ...state.decks,
         [level]: {
@@ -298,7 +331,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       threeStarConsentSeen: true,
     };
     saveGameState(updatedState);
-    set({ gameState: updatedState, showThreeStarConsent: false });
+    set({ gameState: updatedState, showThreeStarConsent: false, pendingStage: null });
     get().changeLevel('three-star');
   },
 
@@ -306,7 +339,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const state = get().gameState;
     if (state && state.currentLevel === 'three-star' && !state.threeStarConsentSeen) {
       // If we entered directly at 3-star and cancelled, fall back to 2-star
-      get().changeLevel('two-star');
+      const twoStarDeck = state.decks['two-star'];
+      const firstCardId = twoStarDeck.shuffledIds.length > 0 ? twoStarDeck.shuffledIds[0] : null;
+      const updatedState: GameState = {
+        ...state,
+        currentLevel: 'two-star',
+        currentCardId: firstCardId,
+        cardsDrawnCount: firstCardId ? 1 : 0,
+        decks: {
+          ...state.decks,
+          'two-star': {
+            ...twoStarDeck,
+            cursor: firstCardId ? 1 : 0,
+            usedIds: firstCardId ? [firstCardId] : [],
+          },
+        },
+      };
+      saveGameState(updatedState);
+      set({
+        gameState: updatedState,
+        showThreeStarConsent: false,
+        pendingStage: null,
+        isCardFlipped: false,
+      });
+      return;
     }
     set({
       showThreeStarConsent: false,

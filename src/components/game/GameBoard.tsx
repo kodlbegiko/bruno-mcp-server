@@ -186,7 +186,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   const handleConfirmThreeStarConsent = () => {
     trackEvent('three_star_accept');
     if (isOnlineMode) {
-      sendAction({ action: 'CONFIRM_THREE_STAR' });
+      sendAction({ action: 'CONFIRM_THREE_STAR', playerId: myPlayerId || undefined });
     } else {
       confirmThreeStarConsent();
     }
@@ -195,7 +195,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   const handleCancelThreeStarConsent = () => {
     trackEvent('three_star_decline');
     if (isOnlineMode) {
-      sendAction({ action: 'CANCEL_THREE_STAR' });
+      sendAction({ action: 'CANCEL_THREE_STAR', playerId: myPlayerId || undefined });
     } else {
       cancelThreeStarConsent();
     }
@@ -207,16 +207,26 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       durationMs: Date.now() - gameState.startedAt,
     });
     if (isOnlineMode) {
-      sendAction({ action: 'END_GAME' });
+      const isHost = useMultiplayerStore.getState().role === 'host';
+      if (isHost) {
+        sendAction({ action: 'END_GAME' });
+        onGameEnd();
+      } else {
+        // Guest leaving room returns safely to home
+        onBackToHome();
+      }
     } else {
       endGame();
+      onGameEnd();
     }
-    onGameEnd();
   };
 
   const handleResetGameConfirm = () => {
     if (isOnlineMode) {
-      sendAction({ action: 'RESET_GAME' });
+      const isHost = useMultiplayerStore.getState().role === 'host';
+      if (isHost) {
+        sendAction({ action: 'RESET_GAME' });
+      }
     } else {
       resetGame();
     }

@@ -6,6 +6,7 @@ import {
   PeerMessage,
   ClientActionPayload,
   SyncStatePayload,
+  ThreeStarConsentState,
 } from '../types/multiplayer';
 import { PEER_CONFIG, generateRoomCode, formatPeerId } from '../game/multiplayer/peerConfig';
 import { useGameStore } from './gameStore';
@@ -28,6 +29,7 @@ export interface MultiplayerStore {
   errorMessage: string | null;
   isReconnecting: boolean;
   reconnectAttempt: number;
+  threeStarConsent: ThreeStarConsentState | null;
 
   createRoom: (hostName: string) => Promise<string>;
   joinRoom: (roomCode: string, playerName: string) => Promise<void>;
@@ -36,6 +38,7 @@ export interface MultiplayerStore {
   sendAction: (action: ClientActionPayload) => void;
   leaveRoom: () => void;
   clearError: () => void;
+  setThreeStarConsent: (consent: ThreeStarConsentState | null) => void;
 }
 
 const MAX_RECONNECT_ATTEMPTS = 3;
@@ -52,6 +55,8 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
   errorMessage: null,
   isReconnecting: false,
   reconnectAttempt: 0,
+  threeStarConsent: null,
+  setThreeStarConsent: (consent) => set({ threeStarConsent: consent }),
 
   createRoom: async (hostName: string) => {
     get().leaveRoom();
@@ -288,6 +293,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
       isCardFlipped: gameStore.isCardFlipped,
       selectedPlayerIds: gameStore.selectedPlayerIds,
       showThreeStarConsent: gameStore.showThreeStarConsent,
+      threeStarConsent: get().threeStarConsent,
     };
 
     peerManager.broadcastToGuests({
@@ -328,6 +334,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
       errorMessage: null,
       isReconnecting: false,
       reconnectAttempt: 0,
+      threeStarConsent: null,
     });
   },
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CardLevel } from '../../types/card';
 import { LEVEL_ORDER, LEVEL_NAMES } from '../../game/progression';
-import { totalDeckCounts, getCardById } from '../../data/decks';
+import { getCardById } from '../../data/decks';
 import { useGameStore } from '../../store/gameStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { useMultiplayerStore } from '../../store/multiplayerStore';
@@ -36,6 +36,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   const setTheme = useSettingsStore((s) => s.setTheme);
 
   const isOnlineMode = useMultiplayerStore((s) => s.isOnlineMode);
+  const role = useMultiplayerStore((s) => s.role);
+  const isHost = !isOnlineMode || role === 'host';
   const sendAction = useMultiplayerStore((s) => s.sendAction);
 
   const [activeTab, setActiveTab] = useState<'decks' | 'history' | 'settings'>('decks');
@@ -44,7 +46,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   if (!gameState) return null;
 
   const currentLevel = gameState.currentLevel;
-  const historyCardIds = gameState.historyCardIds || [];
+  const historyCardIds = gameState.revealedCardIds || gameState.historyCardIds || [];
 
   return (
     <AnimatePresence>
@@ -136,8 +138,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                   <div className="space-y-2.5">
                     {LEVEL_ORDER.map((level: CardLevel) => {
                       const info = LEVEL_NAMES[level];
-                      const total = totalDeckCounts[level];
                       const deckState = gameState.decks[level];
+                      const total = deckState.shuffledIds.length;
                       const drawn = deckState.cursor;
                       const isCurrent = level === currentLevel;
 
@@ -145,7 +147,9 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                         <button
                           key={level}
                           type="button"
+                          disabled={!isHost && !isCurrent}
                           onClick={() => {
+                            if (!isHost) return;
                             if (!isCurrent) {
                               if (isOnlineMode) {
                                 sendAction({ action: 'CHANGE_LEVEL', level });
@@ -158,6 +162,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                           className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-center justify-between ${
                             isCurrent
                               ? 'bg-paper-100 dark:bg-stone-800 border-ink-900 dark:border-stone-400 ring-1 ring-ink-900/10'
+                              : !isHost
+                              ? 'bg-paper-50/50 dark:bg-stone-900/50 border-paper-border/60 dark:border-stone-800 cursor-not-allowed opacity-80'
                               : 'bg-paper-50 dark:bg-stone-900 hover:bg-paper-100/70 dark:hover:bg-stone-800/70 border-paper-border dark:border-stone-750'
                           }`}
                         >
@@ -410,40 +416,42 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                       }}
                       className="w-full py-2.5 px-4 rounded-xl border border-ink-900 dark:border-stone-500 text-ink-900 dark:text-stone-100 font-serif text-sm hover:bg-paper-200 dark:hover:bg-stone-800 transition-colors"
                     >
-                      {t('settings.leave_game')}
+                      {isOnlineMode && !isHost ? '離開房間' : t('settings.leave_game')}
                     </button>
 
-                    {!showConfirmReset ? (
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmReset(true)}
-                        className="w-full py-2.5 px-4 rounded-xl text-rose-700 dark:text-rose-400 hover:text-rose-900 dark:hover:text-rose-300 text-xs font-sans hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-                      >
-                        {t('settings.reset_game')}
-                      </button>
-                    ) : (
-                      <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-center space-y-2">
-                        <p className="text-xs text-rose-900 dark:text-rose-200 font-medium">確定要重置並清空本局進度嗎？</p>
-                        <div className="flex gap-2 justify-center">
-                          <button
-                            type="button"
-                            onClick={() => setShowConfirmReset(false)}
-                            className="px-3 py-1 text-xs rounded bg-paper-50 dark:bg-stone-800 border border-paper-border dark:border-stone-700 text-ink-700 dark:text-stone-300"
-                          >
-                            取消
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setShowConfirmReset(false);
-                              onResetGame();
-                            }}
-                            className="px-3 py-1 text-xs rounded bg-rose-600 text-white font-medium"
-                          >
-                            確定重置
-                          </button>
+                    {isHost && (
+                      !showConfirmReset ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmReset(true)}
+                          className="w-full py-2.5 px-4 rounded-xl text-rose-700 dark:text-rose-400 hover:text-rose-900 dark:hover:text-rose-300 text-xs font-sans hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                        >
+                          {t('settings.reset_game')}
+                        </button>
+                      ) : (
+                        <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-center space-y-2">
+                          <p className="text-xs text-rose-900 dark:text-rose-200 font-medium">確定要重置並清空本局進度嗎？</p>
+                          <div className="flex gap-2 justify-center">
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmReset(false)}
+                              className="px-3 py-1 text-xs rounded bg-paper-50 dark:bg-stone-800 border border-paper-border dark:border-stone-700 text-ink-700 dark:text-stone-300"
+                            >
+                              取消
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowConfirmReset(false);
+                                onResetGame();
+                              }}
+                              className="px-3 py-1 text-xs rounded bg-rose-600 text-white font-medium"
+                            >
+                              確定重置
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      )
                     )}
                   </div>
                 </div>

@@ -7,6 +7,7 @@ import {
 } from '../../types/multiplayer';
 import { useGameStore } from '../gameStore';
 import { useSettingsStore } from '../settingsStore';
+import { useMultiplayerStore } from '../multiplayerStore';
 import { playFlipSound, playSlideSound } from '../../utils/sound';
 import { triggerHaptic } from '../../utils/haptics';
 import { peerManager } from './peerManager';
@@ -46,6 +47,26 @@ export function handleHostIncomingMessage(
     }
 
     case 'JOIN_REQUEST': {
+      if (ctx.players.length >= 8) {
+        conn.send({
+          type: 'JOIN_REJECTED',
+          senderId: ctx.myPlayerId || 'host',
+          payload: { reason: '房間人數已達上限（最多 8 人）' },
+        } as PeerMessage);
+        setTimeout(() => conn.close(), 500);
+        break;
+      }
+
+      if (ctx.isGameStarted) {
+        conn.send({
+          type: 'JOIN_REJECTED',
+          senderId: ctx.myPlayerId || 'host',
+          payload: { reason: '對話已在進行中，無法中途加入' },
+        } as PeerMessage);
+        setTimeout(() => conn.close(), 500);
+        break;
+      }
+
       const guestName = message.payload?.playerName || '旅人';
       const guestPlayerId = `player_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
@@ -70,6 +91,7 @@ export function handleHostIncomingMessage(
           isCardFlipped: useGameStore.getState().isCardFlipped,
           selectedPlayerIds: useGameStore.getState().selectedPlayerIds,
           showThreeStarConsent: useGameStore.getState().showThreeStarConsent,
+          threeStarConsent: useMultiplayerStore.getState().threeStarConsent,
         },
       } as PeerMessage);
 
@@ -114,6 +136,7 @@ export function handleHostIncomingMessage(
           isCardFlipped: useGameStore.getState().isCardFlipped,
           selectedPlayerIds: useGameStore.getState().selectedPlayerIds,
           showThreeStarConsent: useGameStore.getState().showThreeStarConsent,
+          threeStarConsent: useMultiplayerStore.getState().threeStarConsent,
         },
       } as PeerMessage);
 
@@ -135,8 +158,26 @@ export function handleHostIncomingMessage(
       }
 
       const actionPayload = message.payload as ClientActionPayload;
+      if (!actionPayload.playerId) {
+        actionPayload.playerId = sender.id;
+      }
       const currentGameState = useGameStore.getState().gameState;
 
+      // Host-only authority verification
+      const isHostOnlyAction =
+        actionPayload.action === 'CHANGE_LEVEL' ||
+        actionPayload.action === 'END_GAME' ||
+        actionPayload.action === 'RESET_GAME';
+
+      if (isHostOnlyAction && !sender.isHost) {
+        console.warn(
+          `[Host Rejected Action] Non-host (${sender.name}) attempted host-only action:`,
+          actionPayload.action
+        );
+        break;
+      }
+
+      // Drawer-only authority verification
       if (currentGameState && currentGameState.status === 'playing') {
         const currentDrawer = currentGameState.players[currentGameState.drawerIndex];
         const isCurrentDrawer = currentDrawer && currentDrawer.id === sender.id;
@@ -197,6 +238,16 @@ export function handleGuestIncomingMessage(
       break;
     }
 
+    case 'JOIN_REJECTED': {
+      peerManager.stopHeartbeat();
+      const reason = message.payload?.reason || '無法加入房間。';
+      ctx.updateGuestState({
+        connectionStatus: 'error',
+        errorMessage: reason,
+      });
+      break;
+    }
+
     case 'JOIN_ACCEPTED': {
       const {
         myPlayerId,
@@ -206,6 +257,7 @@ export function handleGuestIncomingMessage(
         isCardFlipped,
         selectedPlayerIds,
         showThreeStarConsent,
+        threeStarConsent,
       } = message.payload;
 
       ctx.updateGuestState({
@@ -216,7 +268,14 @@ export function handleGuestIncomingMessage(
         errorMessage: null,
       });
 
+      if (threeStarConsent !== undefined) {
+        useMultiplayerStore.setState({ threeStarConsent: threeStarConsent ?? null });
+      }
+
       if (gameState) {
+        if (gameState.status === 'playing') {
+          useMultiplayerStore.setState({ isGameStarted: true });
+        }
         useGameStore.setState({
           gameState,
           isCardFlipped: isCardFlipped ?? false,
@@ -234,10 +293,23 @@ export function handleGuestIncomingMessage(
     }
 
     case 'SYNC_STATE': {
-      const { gameState, isCardFlipped, selectedPlayerIds, showThreeStarConsent } =
-        message.payload as SyncStatePayload;
+      const {
+        gameState,
+        isCardFlipped,
+        selectedPlayerIds,
+        showThreeStarConsent,
+        threeStarConsent,
+      } = message.payload as SyncStatePayload;
       const prevFlipped = useGameStore.getState().isCardFlipped;
       const prevCardId = useGameStore.getState().gameState?.currentCardId;
+
+      if (threeStarConsent !== undefined) {
+        useMultiplayerStore.setState({ threeStarConsent: threeStarConsent ?? null });
+      }
+
+      if (gameState && gameState.status === 'playing') {
+        useMultiplayerStore.setState({ isGameStarted: true });
+      }
 
       useGameStore.setState({
         gameState,
