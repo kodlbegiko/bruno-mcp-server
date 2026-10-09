@@ -10,3 +10,15 @@ test-results/
 playwright-report/
 blob-report/
 .playwright/
+
+# Raw extraction assets & tools
+raw_assets/
+*.swift
+*ocr*.py
+extract_*.py
+generate_audit_*.py
+generate_ts_*.py
+verify_and_dump_*.py
+MyFirstApp/
+expense_db/
+legacy_bruno_mcp/
