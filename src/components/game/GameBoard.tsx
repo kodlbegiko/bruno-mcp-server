@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../store/gameStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { getCardById, totalDeckCounts } from '../../data/decks';
@@ -16,6 +17,7 @@ import { Button } from '../ui/Button';
 import { useMultiplayerStore } from '../../store/multiplayerStore';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { prefetchCardAssets } from '../../utils/prefetch';
+import { trackEvent } from '../../utils/analytics';
 
 interface GameBoardProps {
   onBackToHome: () => void;
@@ -54,6 +56,21 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [deepenPromptDismissedForLevel, setDeepenPromptDismissedForLevel] = useState<string | null>(null);
+  const [showTwoStarNotice, setShowTwoStarNotice] = useState(false);
+  const hasShownTwoStarNoticeRef = useRef(false);
+
+  // Two-Star gentle safety notice on first entry
+  useEffect(() => {
+    if (gameState?.currentLevel === 'two-star' && !hasShownTwoStarNoticeRef.current) {
+      hasShownTwoStarNoticeRef.current = true;
+      setShowTwoStarNotice(true);
+      trackEvent('two_star_notice_shown');
+      const timer = setTimeout(() => {
+        setShowTwoStarNotice(false);
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState?.currentLevel]);
 
   // Screen Wake Lock: Automatically keeps screen awake during face-to-face dialogue
   useWakeLock(true);
@@ -114,6 +131,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     : `現在輪到【${drawer?.name || '抽牌者'}】抽牌。點擊卡牌翻開。`;
 
   const handleNextCard = () => {
+    trackEvent('card_next', { cardId: currentCard?.id, level: currentLevel });
     playSlideSound(soundEnabled);
     triggerHaptic('light', hapticsEnabled);
     if (isOnlineMode) {
@@ -124,6 +142,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   };
 
   const handleSkipCard = () => {
+    trackEvent('card_skip', { cardId: currentCard?.id, level: currentLevel });
     playSlideSound(soundEnabled);
     triggerHaptic('medium', hapticsEnabled);
     if (isOnlineMode) {
@@ -134,6 +153,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   };
 
   const handleFlipCard = () => {
+    trackEvent('first_card_flip', { cardId: currentCard?.id, level: currentLevel });
+    trackEvent('card_flip', { cardId: currentCard?.id, level: currentLevel });
     if (isOnlineMode) {
       sendAction({ action: 'FLIP_CARD' });
     } else {
@@ -152,6 +173,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   const handleNextStage = () => {
     const next = getNextLevel(currentLevel);
     if (next) {
+      trackEvent('level_enter', { level: next });
       if (isOnlineMode) {
         sendAction({ action: 'CHANGE_LEVEL', level: next });
       } else {
@@ -162,6 +184,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   };
 
   const handleConfirmThreeStarConsent = () => {
+    trackEvent('three_star_accept');
     if (isOnlineMode) {
       sendAction({ action: 'CONFIRM_THREE_STAR' });
     } else {
@@ -170,6 +193,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   };
 
   const handleCancelThreeStarConsent = () => {
+    trackEvent('three_star_decline');
     if (isOnlineMode) {
       sendAction({ action: 'CANCEL_THREE_STAR' });
     } else {
@@ -178,6 +202,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   };
 
   const handleEndGameConfirm = () => {
+    trackEvent('game_end', {
+      cardsDrawn: gameState.cardsDrawnCount,
+      durationMs: Date.now() - gameState.startedAt,
+    });
     if (isOnlineMode) {
       sendAction({ action: 'END_GAME' });
     } else {
@@ -254,6 +282,36 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Main Playing Area */}
       <main className="flex-1 flex flex-col items-center justify-between px-4 py-3 sm:py-6 max-w-lg mx-auto w-full">
+        {/* Two-Star Gentle Safety Notice */}
+        <AnimatePresence>
+          {showTwoStarNotice && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.98 }}
+              transition={{ duration: 0.25 }}
+              className="w-full mb-3"
+            >
+              <div className="p-3 rounded-2xl bg-amber-50/95 dark:bg-stone-850/95 border border-amber-200/80 dark:border-stone-700 shadow-soft flex items-start gap-2.5 backdrop-blur-xs text-left">
+                <span className="text-base shrink-0 leading-none mt-0.5">🌿</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-serif text-ink-800 dark:text-stone-200 leading-relaxed">
+                    二星題目會更靠近個人經驗。不想回答的題目，直接點「換一題」就好，不需要解釋原因。
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTwoStarNotice(false)}
+                  className="text-ink-400 hover:text-ink-700 dark:text-stone-500 dark:hover:text-stone-300 text-xs px-1"
+                  aria-label="關閉提示"
+                >
+                  ✕
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Drawer turn banner */}
         <div className="w-full flex flex-col items-center mb-2 sm:mb-3 gap-1">
           {isOnlineMode && isMyTurn && (

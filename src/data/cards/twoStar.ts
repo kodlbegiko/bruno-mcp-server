@@ -194,7 +194,7 @@ export const twoStarCards: Card[] = [
     stars: 2,
     zh: '描述一次你覺得自己被照亮的時刻（精確地說出你的特質與優點）？',
     enTitle: 'A Moment You Felt Seen',
-    en: 'Describe a time when your strengths and qualities were truly recognized.and learn from?',
+    en: 'Describe a time when your strengths and qualities were truly recognized and seen.',
     interaction: 'single',
     responderRule: 'drawer',
     targetRule: 'none',

@@ -91,6 +91,15 @@ export const App: React.FC = () => {
     setCurrentRoute('setup');
   };
 
+  const handleQuickStart = () => {
+    const defaultPlayers = [
+      { id: 'player_1', name: '玩家 1' },
+      { id: 'player_2', name: '玩家 2' },
+    ];
+    initGame(defaultPlayers, 'guided', null, 'icebreaker');
+    setCurrentRoute('game');
+  };
+
   const handleStartGameFromSetup = () => {
     setCurrentRoute('game');
   };
@@ -162,6 +171,7 @@ export const App: React.FC = () => {
           onStartNewGame={handleStartNewGame}
           onResumeGame={handleResumeGame}
           onStartOnlineGame={handleStartOnlineGame}
+          onQuickStart={handleQuickStart}
         />
       )}
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { Button } from '../components/ui/Button';
@@ -6,17 +6,20 @@ import { RulesModal } from '../components/common/RulesModal';
 import { SettingsModal } from '../components/common/SettingsModal';
 import { PwaInstallPrompt } from '../components/ui/PwaInstallPrompt';
 import { LEVEL_NAMES } from '../game/progression';
+import { trackEvent, resetSessionTimer } from '../utils/analytics';
 
 interface HomeProps {
   onStartNewGame: () => void;
   onResumeGame: () => void;
   onStartOnlineGame: () => void;
+  onQuickStart: () => void;
 }
 
 export const Home: React.FC<HomeProps> = ({
   onStartNewGame,
   onResumeGame,
   onStartOnlineGame,
+  onQuickStart,
 }) => {
   const gameState = useGameStore((s) => s.gameState);
   const resetGame = useGameStore((s) => s.resetGame);
@@ -25,12 +28,28 @@ export const Home: React.FC<HomeProps> = ({
   const [showSettings, setShowSettings] = useState(false);
   const [showConfirmNew, setShowConfirmNew] = useState(false);
 
+  useEffect(() => {
+    resetSessionTimer();
+    trackEvent('home_view');
+  }, []);
+
   const hasActiveGame = !!(gameState && gameState.status === 'playing');
+
+  const handleQuickStart = () => {
+    if (hasActiveGame) {
+      setShowConfirmNew(true);
+    } else {
+      trackEvent('quick_start');
+      trackEvent('shared_device_start');
+      onQuickStart();
+    }
+  };
 
   const handleNewGameClick = () => {
     if (hasActiveGame) {
       setShowConfirmNew(true);
     } else {
+      trackEvent('custom_setup_start');
       onStartNewGame();
     }
   };
@@ -73,6 +92,9 @@ export const Home: React.FC<HomeProps> = ({
       <main className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full my-6 text-center space-y-6">
         {/* Title & Editorial Subtitle */}
         <div className="space-y-3">
+          <div className="inline-block px-3 py-1 rounded-full bg-paper-200/70 dark:bg-stone-800 text-[11px] font-mono tracking-widest text-ink-600 dark:text-stone-400">
+            手機是牌盒，不是主角
+          </div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-ink-900 dark:text-stone-100 tracking-tight">
             深刻認識一個人
           </h1>
@@ -179,47 +201,62 @@ export const Home: React.FC<HomeProps> = ({
               <Button
                 variant="secondary"
                 size="md"
-                className="flex-1"
+                className="flex-1 text-xs sm:text-sm font-medium"
                 onClick={handleNewGameClick}
               >
-                開始新遊戲
+                開始遊戲 · 自訂設定
               </Button>
               <Button
                 variant="secondary"
                 size="md"
-                className="flex-1 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/40 hover:bg-emerald-100/50 dark:hover:bg-emerald-900/40"
-                onClick={onStartOnlineGame}
+                className="flex-1 text-xs sm:text-sm font-medium border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/40 hover:bg-emerald-100/50 dark:hover:bg-emerald-900/40"
+                onClick={() => {
+                  trackEvent('multiplayer_start');
+                  onStartOnlineGame();
+                }}
               >
-                🌐 多人連線
+                每人用自己的手機（多人連線 Beta）
               </Button>
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <Button
               variant="primary"
               size="lg"
               fullWidth
-              onClick={onStartNewGame}
-              className="shadow-lg"
+              onClick={handleQuickStart}
+              className="shadow-lg flex items-center justify-center gap-2"
             >
-              開始遊戲（單機面對面）
+              <span className="font-medium">⚡ 快速開始（共用這支手機）</span>
             </Button>
-            <Button
-              variant="secondary"
-              size="md"
-              fullWidth
-              onClick={onStartOnlineGame}
-              className="border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/40 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/50"
-            >
-              🌐 多人連線房間（各自手機同步）
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                size="md"
+                className="flex-1 text-xs sm:text-sm font-medium"
+                onClick={handleNewGameClick}
+              >
+                開始遊戲 · 自訂設定
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                className="flex-1 text-xs sm:text-sm font-medium border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/40 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/50"
+                onClick={() => {
+                  trackEvent('multiplayer_start');
+                  onStartOnlineGame();
+                }}
+              >
+                每人用自己的手機（多人連線 Beta）
+              </Button>
+            </div>
           </div>
         )}
 
         <div className="pt-2 text-center">
           <p className="text-[11px] text-ink-500 dark:text-stone-400 font-sans tracking-wide">
-            70 張對話卡牌 · 100% 本地保存 · 無需登入 · 嚴格保護隱私
+            70 張對話卡牌 · 不記錄對話 · 無需登入 · 專注於彼此
           </p>
         </div>
       </footer>

@@ -5,6 +5,22 @@ import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/gameStore';
 import { LEVEL_NAMES } from '../game/progression';
 import { Button } from '../components/ui/Button';
+import { trackEvent } from '../utils/analytics';
+
+const CLOSING_PROMPTS = [
+  {
+    zh: '今天你對彼此多知道了哪一件事情？',
+    en: 'What is one new thing you learned about each other today?',
+  },
+  {
+    zh: '有哪一句話，是你想從今晚帶走的？',
+    en: 'What is one phrase or feeling you want to take away from tonight?',
+  },
+  {
+    zh: '用一句話，謝謝今晚願意坦誠分享的彼此。',
+    en: 'In one sentence, thank each other for being open and present.',
+  },
+];
 
 interface EndingProps {
   onPlayAgain: () => void;
@@ -16,6 +32,12 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
   const [copied, setCopied] = useState(false);
   const gameState = useGameStore((s) => s.gameState);
   const resetGame = useGameStore((s) => s.resetGame);
+  const [promptIndex] = useState(() => Math.floor(Math.random() * CLOSING_PROMPTS.length));
+  const closingPrompt = CLOSING_PROMPTS[promptIndex];
+
+  React.useEffect(() => {
+    trackEvent('closing_card_view', { prompt: closingPrompt.zh });
+  }, [closingPrompt.zh]);
 
   if (!gameState) {
     return (
@@ -38,6 +60,7 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
   const highestLevelInfo = LEVEL_NAMES[highestLevel];
 
   const handlePlayAgain = () => {
+    trackEvent('play_again');
     resetGame();
     onPlayAgain();
   };
@@ -48,6 +71,7 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
   };
 
   const handleShare = async () => {
+    trackEvent('share');
     const isEn = i18n.language === 'en';
     const shareTitle = isEn
       ? 'Deeply Know Someone · Conversation Session'
@@ -108,6 +132,28 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
           <p>{t('ending.quote_2')}</p>
           <p>{t('ending.quote_3')}</p>
         </div>
+      </motion.div>
+
+      {/* Closing Ritual Card */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+        className="bg-amber-50/80 dark:bg-stone-850/90 border border-amber-200/80 dark:border-stone-700 rounded-2xl p-5 my-3 text-center space-y-2.5 shadow-soft"
+      >
+        <div className="flex items-center justify-center gap-1.5 text-xs font-mono font-medium text-amber-800 dark:text-amber-400 uppercase tracking-wider">
+          <span>🕯️</span>
+          <span>對話收尾儀式 · Closing Ritual</span>
+        </div>
+        <p className="font-serif text-base sm:text-lg font-medium text-ink-900 dark:text-stone-100 leading-snug">
+          {closingPrompt.zh}
+        </p>
+        <p className="text-xs text-ink-500 dark:text-stone-400 font-sans italic">
+          {closingPrompt.en}
+        </p>
+        <p className="text-[11px] text-ink-600 dark:text-stone-400 font-serif pt-1.5 border-t border-amber-200/50 dark:border-stone-800">
+          放下手機，看著彼此的眼睛，每個人輪流分享最後一句話。
+        </p>
       </motion.div>
 
       {/* Session Stats Card */}

@@ -54,8 +54,23 @@ export const PwaInstallPrompt: React.FC = () => {
     sessionStorage.setItem('pwa_prompt_dismissed', 'true');
   };
 
-  // Only show if not standalone, not dismissed, and either beforeinstallprompt is ready OR is iOS
-  const shouldShow = !isStandalone && !isDismissed && (deferredPrompt !== null || isIos);
+  // Only prompt users who have engaged with the game (at least 5 cards flipped or a completed game)
+  const hasExperiencedGame = (() => {
+    try {
+      if (typeof window === 'undefined') return false;
+      const raw = localStorage.getItem('deeply-know-game:v1');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return (parsed?.cardsDrawnCount || 0) >= 5 || (parsed?.history?.length || 0) >= 5;
+      }
+    } catch {
+      // ignore
+    }
+    return false;
+  })();
+
+  // Only show if not standalone, not dismissed, has experienced game, and install is ready OR is iOS
+  const shouldShow = hasExperiencedGame && !isStandalone && !isDismissed && (deferredPrompt !== null || isIos);
 
   if (!shouldShow) return null;
 

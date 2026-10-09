@@ -1,4 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
+import { clearGameState, GAME_STORAGE_KEY } from '../../game/persistence';
 
 interface Props {
   children: ReactNode;
@@ -29,6 +30,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleResetAndHome = () => {
     try {
+      clearGameState();
+      localStorage.removeItem(GAME_STORAGE_KEY);
       localStorage.removeItem('deeply_know_someone_game_state');
     } catch {
       // ignore

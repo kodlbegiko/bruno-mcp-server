@@ -22,3 +22,4 @@ verify_and_dump_*.py
 MyFirstApp/
 expense_db/
 legacy_bruno_mcp/
+*.zip

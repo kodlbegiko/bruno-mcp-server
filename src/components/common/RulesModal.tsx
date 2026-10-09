@@ -50,7 +50,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
                     <p className="text-xs text-ink-600 dark:text-stone-300 mt-1 font-sans">
                       {lvl === 'icebreaker' && '破冰行動、有趣分享、降低尷尬，輕鬆打開話匣子。'}
                       {lvl === 'one-star' && '習慣、喜好、生活經驗、個性，開始認識彼此日常。'}
-                      {lvl === 'two-star' && '情緒、家庭、價值公、感情、害怕，進入真實個人內在。'}
+                      {lvl === 'two-star' && '情緒、家庭、價值觀、感情、害怕，進入真實個人內在。'}
                       {lvl === 'three-star' && '脆弱、遺憾、挑戰、人生重大選擇，觸碰最深刻的生命經驗。'}
                     </p>
                   </div>
@@ -79,9 +79,9 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
         </section>
 
         {/* Privacy Note */}
-        <section className="p-3 rounded-xl bg-paper-200/50 dark:bg-stone-800/60 border border-paper-border dark:border-stone-700 text-xs text-ink-600 dark:text-stone-300 font-sans">
+        <section className="p-3 rounded-xl bg-paper-200/50 dark:bg-stone-800/60 border border-paper-border dark:border-stone-700 text-xs text-ink-600 dark:text-stone-300 font-sans leading-relaxed">
           <strong>隱私承諾：</strong>
-          本遊戲完全在您的裝置本地運行，不錄音、不記錄任何回答內容、不收集個人數據。對話只屬於當下的你們。
+          不錄音，也不儲存任何人的回答內容。單機模式的遊戲進度只保存在目前裝置，多人模式只同步遊戲狀態，不傳送對話內容。對話只屬於當下的你們。
         </section>
 
         <Button variant="primary" fullWidth onClick={onClose}>

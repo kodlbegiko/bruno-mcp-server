@@ -23,8 +23,10 @@ export const DeepenPrompt: React.FC<DeepenPromptProps> = ({
 
   const nextInfo = LEVEL_NAMES[nextLevel];
 
-  // If deck is empty, must show; otherwise only show if user has drawn at least 3 cards
-  if (!isDeckEmpty && cardsDrawnInLevel < 3) {
+  // Dynamic minimum depth threshold based on emotional pacing:
+  // icebreaker: 4 cards, one-star: 4 cards, two-star: 5 cards
+  const minRequiredCards = currentLevel === 'two-star' ? 5 : 4;
+  if (!isDeckEmpty && cardsDrawnInLevel < minRequiredCards) {
     return null;
   }
 
@@ -40,10 +42,12 @@ export const DeepenPrompt: React.FC<DeepenPromptProps> = ({
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-xs sm:text-sm font-serif font-medium text-ink-900 dark:text-stone-100 truncate">
-              {isDeckEmpty ? '本階段卡片已抽完' : '想再深入一點嗎？'}
+              {isDeckEmpty ? '本階段卡片已翻完' : '現在的聊天節奏舒服嗎？'}
             </p>
             <p className="text-[11px] text-ink-500 dark:text-stone-400 font-sans truncate">
-              {isDeckEmpty ? `可前往下一階段：${nextInfo.zh}` : `準備好可前往 ${nextInfo.zh}`}
+              {isDeckEmpty
+                ? `可前往下一階段：${nextInfo.zh}`
+                : `可繼續停留，或前往【${nextInfo.zh}】`}
             </p>
           </div>
 
@@ -54,7 +58,7 @@ export const DeepenPrompt: React.FC<DeepenPromptProps> = ({
                 onClick={onDismiss}
                 className="px-2.5 py-1.5 text-xs text-ink-500 dark:text-stone-400 hover:text-ink-700 dark:hover:text-stone-200 active:text-ink-900 dark:active:text-stone-100 transition-colors rounded-lg hover:bg-paper-200/60 dark:hover:bg-stone-700/60"
               >
-                繼續此階段
+                繼續留在這裡
               </button>
             )}
             <button
