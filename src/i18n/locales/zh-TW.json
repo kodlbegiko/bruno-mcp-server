@@ -1,0 +1,99 @@
+{
+  "app": {
+    "title": "深刻認識一個人",
+    "subtitle": "一場透過問答與傾聽，走進彼此內心深處的對話之旅。",
+    "offline_banner": "目前處於離線狀態 — 單機模式與快取卡牌仍可正常遊玩",
+    "online_restored": "網路連線已恢復，已同步最新狀態",
+    "close_notice": "關閉提示"
+  },
+  "home": {
+    "start_new": "開啟新對話",
+    "resume_game": "繼續上次的對話",
+    "online_game": "多人連線房間",
+    "how_to_play": "遊戲說明與規則",
+    "cards_count": "全套 70 張官方實體卡牌精準還原"
+  },
+  "levels": {
+    "icebreaker": "破冰",
+    "icebreaker_desc": "輕鬆開啟話題",
+    "one_star": "1 星",
+    "one_star_desc": "初次認識與生活分享",
+    "two_star": "2 星",
+    "two_star_desc": "情感價值與深入探索",
+    "three_star": "3 星",
+    "three_star_desc": "靈魂共鳴與脆弱時刻"
+  },
+  "game": {
+    "flip_prompt": "輕觸或點擊卡牌翻開題目",
+    "next_card": "下一張",
+    "skip_card": "跳過",
+    "finish_game": "結束對話",
+    "drawer_turn": "現在輪到 {{name}} 抽牌",
+    "deck_empty": "本階段卡牌已全部翻完",
+    "stage_complete": "階段完成"
+  },
+  "settings": {
+    "title": "偏好設定",
+    "bilingual": "雙語題卡 (英文副標)",
+    "bilingual_desc": "在卡牌底部顯示英文翻譯",
+    "language": "介面語言 (Language)",
+    "theme": "色彩主題",
+    "theme_light": "淺色",
+    "theme_dark": "深色",
+    "theme_auto": "系統",
+    "sound": "音效回饋",
+    "sound_desc": "翻牌與抽牌時播放紙質音效",
+    "haptics": "觸覺震動",
+    "haptics_desc": "操作時提供細緻震動感應",
+    "reduced_motion": "減少動態效果",
+    "reduced_motion_desc": "降低翻牌與卡片滑動動畫幅度",
+    "wakelock": "螢幕常亮保護",
+    "wakelock_desc": "對話期間保持手機螢幕常亮",
+    "wakelock_active": "自動啟用",
+    "wakelock_unsupported": "瀏覽器未支援",
+    "leave_game": "結束這局遊戲",
+    "reset_game": "重新開始遊戲（重置進度）"
+  },
+  "time_reminder": {
+    "title": "時間提醒",
+    "goal_reached": "已達到預定的對話時間（{{minutes}} 分鐘）",
+    "continue": "繼續對話",
+    "finish": "結束遊戲"
+  },
+  "three_star": {
+    "title": "即將進入 3 星深層對話",
+    "desc": "3 星卡牌包含深刻而私密的話題，需要每位參與者的坦誠與安心感。請確認所有人都願意繼續進行。",
+    "consent_button": "大家都準備好了，繼續",
+    "back_button": "留在 2 星階段"
+  },
+  "multiplayer": {
+    "room_code": "房間代碼",
+    "copy_code": "複製代碼",
+    "code_copied": "已複製！",
+    "create_room": "建立房間",
+    "join_room": "加入房間",
+    "host": "房主",
+    "guest": "玩家",
+    "connecting": "正在連線...",
+    "reconnecting": "正在重新連線...",
+    "connection_lost": "連線已中斷",
+    "retry": "手動重新連線",
+    "back_to_home": "返回首頁"
+  },
+  "ending": {
+    "title": "謝謝彼此的坦誠與聆聽",
+    "quote_1": "在忙碌的世界裡，",
+    "quote_2": "能放下手機、專注聆聽，",
+    "quote_3": "真正認識一個人，是一件珍貴的事。",
+    "session_record": "本次對話紀錄",
+    "cards_drawn": "翻開卡牌",
+    "duration": "對話歷時",
+    "participants": "參與人數",
+    "highest_depth": "最高深度",
+    "share_button": "分享對話紀錄",
+    "copied": "已複製對話紀錄！",
+    "play_again": "再玩一次",
+    "back_to_home": "返回首頁",
+    "privacy_notice": "隱私聲明：本場所有回答與對話均未被記錄或儲存。"
+  }
+}

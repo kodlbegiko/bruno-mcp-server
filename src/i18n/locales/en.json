@@ -1,0 +1,99 @@
+{
+  "app": {
+    "title": "Deeply Know Someone",
+    "subtitle": "A conversation journey into each other's inner worlds through questions and mindful listening.",
+    "offline_banner": "Currently offline — Solo mode and cached cards remain fully playable",
+    "online_restored": "Connection restored. Synced with latest state.",
+    "close_notice": "Close notice"
+  },
+  "home": {
+    "start_new": "Start New Conversation",
+    "resume_game": "Resume Last Game",
+    "online_game": "Online Multiplayer Room",
+    "how_to_play": "Rules & Guide",
+    "cards_count": "All 70 official physical cards accurately curated"
+  },
+  "levels": {
+    "icebreaker": "Break the Ice",
+    "icebreaker_desc": "Light & easy topics to warm up",
+    "one_star": "1 Star",
+    "one_star_desc": "Getting to know each other & daily life",
+    "two_star": "2 Star",
+    "two_star_desc": "Emotional values & deeper exploration",
+    "three_star": "3 Star",
+    "three_star_desc": "Soul resonance & vulnerable moments"
+  },
+  "game": {
+    "flip_prompt": "Tap or click the card to reveal the question",
+    "next_card": "Next Card",
+    "skip_card": "Skip",
+    "finish_game": "End Game",
+    "drawer_turn": "It's {{name}}'s turn to draw",
+    "deck_empty": "All cards in this level have been drawn",
+    "stage_complete": "Stage Complete"
+  },
+  "settings": {
+    "title": "Settings & Accessibility",
+    "bilingual": "Card English Subtitles",
+    "bilingual_desc": "Display English translations on card prompts",
+    "language": "UI Language",
+    "theme": "Color Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_auto": "Auto",
+    "sound": "Sound Effects",
+    "sound_desc": "Play paper rustling sounds on card interactions",
+    "haptics": "Haptic Feedback",
+    "haptics_desc": "Tactile vibration when interacting with cards",
+    "reduced_motion": "Reduced Motion",
+    "reduced_motion_desc": "Subtle card transitions with minimal motion",
+    "wakelock": "Keep Screen Awake",
+    "wakelock_desc": "Prevent screen dimming during conversation",
+    "wakelock_active": "Screen Stay Active",
+    "wakelock_unsupported": "Not supported in this browser",
+    "leave_game": "Leave Game",
+    "reset_game": "Restart Game"
+  },
+  "time_reminder": {
+    "title": "Time Reminder",
+    "goal_reached": "Target conversation duration reached ({{minutes}} mins)",
+    "continue": "Keep Talking",
+    "finish": "End Session"
+  },
+  "three_star": {
+    "title": "Entering 3-Star Deep Conversation",
+    "desc": "3-Star questions explore deep and vulnerable topics. Please ensure everyone feels safe and comfortable before proceeding.",
+    "consent_button": "Everyone is ready, continue",
+    "back_button": "Stay in 2-Star level"
+  },
+  "multiplayer": {
+    "room_code": "Room Code",
+    "copy_code": "Copy Code",
+    "code_copied": "Copied!",
+    "create_room": "Create Room",
+    "join_room": "Join Room",
+    "host": "Host",
+    "guest": "Player",
+    "connecting": "Connecting...",
+    "reconnecting": "Reconnecting...",
+    "connection_lost": "Connection Lost",
+    "retry": "Reconnect Manually",
+    "back_to_home": "Back to Home"
+  },
+  "ending": {
+    "title": "Thank You for the Vulnerability & Listening",
+    "quote_1": "In a busy world,",
+    "quote_2": "putting down our phones to truly listen,",
+    "quote_3": "and deeply knowing someone, is a rare treasure.",
+    "session_record": "Session Summary",
+    "cards_drawn": "Cards Drawn",
+    "duration": "Duration",
+    "participants": "Participants",
+    "highest_depth": "Peak Depth",
+    "share_button": "Share Session Summary",
+    "copied": "Copied to clipboard!",
+    "play_again": "Play Again",
+    "back_to_home": "Back to Home",
+    "privacy_notice": "Privacy Notice: No responses or conversations are ever recorded or stored."
+  }
+}

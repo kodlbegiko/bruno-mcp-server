@@ -1,38 +1,48 @@
 {
-  "name": "bruno-mcp-server",
-  "version": "0.1.0",
-  "description": "Local-first MCP server for discovering, inspecting, and running Bruno API requests",
+  "name": "deeply-know-someone",
+  "private": true,
+  "version": "1.0.0",
   "type": "module",
-  "bin": {
-    "bruno-mcp-server": "./dist/index.js"
-  },
-  "files": [
-    "dist"
-  ],
-  "engines": {
-    "node": ">=20.0.0"
-  },
   "scripts": {
-    "build": "tsc",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src/ tests/",
-    "test": "vitest run",
-    "check": "npm run typecheck && npm run lint && npm run build && npm run test"
+    "dev": "node ./node_modules/vite/bin/vite.js",
+    "build": "node ./node_modules/typescript/bin/tsc --noEmit && node ./node_modules/vite/bin/vite.js build",
+    "preview": "node ./node_modules/vite/bin/vite.js preview",
+    "test": "node ./node_modules/vitest/vitest.mjs run",
+    "test:watch": "node ./node_modules/vitest/vitest.mjs",
+    "test:e2e": "node ./node_modules/@playwright/test/cli.js test",
+    "typecheck": "node ./node_modules/typescript/bin/tsc --noEmit"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.1",
-    "@usebruno/cli": "3.5.1",
-    "zod": "^3.23.8"
+    "@types/qrcode": "^1.5.6",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.40.0",
+    "html5-qrcode": "^2.3.8",
+    "i18next": "^26.4.2",
+    "lucide-react": "^0.475.0",
+    "peerjs": "^1.5.5",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-i18next": "^17.0.16",
+    "tailwind-merge": "^3.0.1",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@types/node": "^20.14.9",
-    "eslint": "^9.5.0",
-    "typescript": "^5.5.2",
-    "typescript-eslint": "^8.0.0",
-    "vitest": "^1.6.0"
-  },
-  "overrides": {
-    "form-data": "4.0.6",
-    "uuid": "11.1.1"
+    "@playwright/test": "^1.50.1",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "jsdom": "^26.0.0",
+    "postcss": "^8.5.2",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "vite": "6.0.11",
+    "vite-plugin-pwa": "^0.21.1",
+    "vitest": "^3.0.5"
   }
 }

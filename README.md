@@ -1,109 +1,104 @@
-# Bruno MCP Server
+# 《深刻認識一個人》 (Deeply Know Someone) · v1.0.0
 
-A local-first, secure **Model Context Protocol (MCP)** server that enables AI coding assistants (like Cursor, Claude Desktop, and Aider) to discover, inspect, and run API requests in your **Bruno** collections entirely locally.
+> 「有些人認識很久，卻從來沒有真正認識過彼此。」  
+> 一副存在手機裡的實體感對話卡牌。
 
-<p align="center">
-  <video src="./assets/demo.mov" width="100%" autoplay loop muted></video>
-</p>
-
----
-
-## Key Features
-
-- **Local-First & Private**: Executes API calls locally on your machine using your own local Bruno files and environments. No credentials or source files are sent to a cloud service.
-- **Universal Connection (MCP)**: Standardizes how AI coding agents query, analyze, and verify your back-end APIs.
-- **Tolerant Parsing**: Extracts metadata (URL, headers, body types, bearer tokens) from `.bru` files while preserving the exact raw contents.
-- **Process Sandbox**: Executes requests by calling your project-local `@usebruno/cli` directly with no shell interpolation, protecting against command injection.
+《深刻認識一個人》是一款面對面進行的關係對話卡牌遊戲。核心不是競爭、勝負、分數或排行榜，而是**讓兩個或多個人，透過逐步加深的問題，更真實地認識彼此**。
 
 ---
 
-## Installation
+## 🎯 最高優先原則
 
-### Prerequisites
-- Node.js >= 20.0.0
-- A Bruno collection initialized in your workspace.
+1. **卡牌內容 100% 正確**：嚴格依照官方實體卡牌原稿素材，收錄 70 張原版題目（0 張私自加減、0 改寫）。
+2. **面對面互動不被手機打斷**：手機是「牌盒＋主持人」，翻牌後注意力回到彼此對視與聆聽，絕不要求「每人回答後按完成」。
+3. **安全無壓力的對話機制**：
+   - 任何人隨時可以「**換一題**」或向左滑動換題，不需提供理由、沒有任何扣分或懲罰，該卡牌在本局中銷毀不再出現。
+   - 進入三星前設有溫和的隱私守護同意機制。
+4. **可靠的狀態保存**：遊戲進度即時自動保存至本機 `localStorage`，重新整理或誤觸關閉可一鍵「繼續上次遊戲」。
+5. **極致隱私保護**：100% 離線運行、不錄音、不記錄任何回答內容、不收集遙測數據、無須註冊登入。
 
-### Running with npx
-You can boot the server directly via `npx`:
+---
+
+## 🃏 卡牌架構 (70 張正式題目)
+
+| 階段 | 星級 | 卡牌數量 | 核心主題 | 卡背視覺 |
+| :--- | :---: | :---: | :--- | :--- |
+| **暖身破冰** | 0 ★ | 10 張 | 破冰行動、有趣分享、簡單生活經驗、降低尷尬 | 湛藍色（揮手圖案） |
+| **一星連結** | 1 ★ | 20 張 | 興趣個性、日常習慣、喜好特質、童年故事 | 黃綠色（咖啡杯圖案） |
+| **二星連結** | 2 ★ | 20 張 | 情緒人際、感情家庭、深層價值觀、害怕與成長 | 橙橘色（相聚剪影） |
+| **三星連結** | 3 ★ | 20 張 | 重大轉折、失敗遺憾、脆弱告白、生命深層記憶 | 珊瑚粉（擁抱剪影） |
+
+* 完整 70 張卡牌審計表與圖文對照請參閱 [`docs/card-audit.md`](docs/card-audit.md)。
+* 詳細遊戲規則說明請參閱 [`docs/game-rules.md`](docs/game-rules.md)。
+
+---
+
+## 🌟 核心特色與體驗優化
+
+- 🌐 **WebRTC P2P 多人同步連線**：
+  - 基於 PeerJS 的無伺服器端對端連線，房主一鍵開房，房客各自手機即時同步翻牌與主持棒輪替。
+  - 內建 7 組全球公用高可用性 STUN 節點，搭配 3.5s 心跳包 (Ping/Pong) 監控看門狗，異常中斷 9s 內自動觸發重連。
+- 📸 **QR Code 相機掃描加入**：
+  - 支援動態 QR Code 生成與本機相機掃描儀 (`html5-qrcode`)，免輸入 6 碼代碼，一掃即入房。
+- 👆 **Tinder 式物理滑動手勢**：
+  - 卡牌翻開後支援自然的手勢拖曳：**向右滑動（下一張）**、**向左滑動（換一題）**，附帶觸覺震動回饋與動態指示標籤。
+- 🌙 **質感深色模式 (Night Mode)**：
+  - 支援系統跟隨與手動切換（淺色 / 深色 / 系統），暖調炭黑紙質配色，深夜微醺長談柔和不刺眼。
+  - 自動更新手機狀態列 `<meta name="theme-color">`。
+- 🚀 **原生社群分享 (Web Share API)**：
+  - 結算頁面支援原生分享面版（一鍵分享至 IG 限動、LINE、Threads），若無支援則自動降級至剪貼簿複製。
+- ⚡️ **零延遲預載 (Zero-Latency Prefetching)**：
+  - 背景預熱卡背貼圖與下一張題目數據，翻牌換題徹底零延遲。
+- 📶 **PWA 漸進式網頁應用與離線支援**：
+  - 遵循 Workbox 快取架構（圖片靜態 30 天 CacheFirst、HTML NetworkFirst）。
+  - 斷線時優雅浮現離線狀態提醒，單機卡牌離線亦可暢玩。
+- 👁 **螢幕防休眠 (Screen Wake Lock)**：
+  - 對話進行中自動鎖定螢幕常亮，避免深談時手機黑屏中斷氛圍。
+- 🌐 **雙語與國際化 (i18n)**：
+  - 支援繁體中文與英文介面切換，支援卡牌底部英文副標題對照。
+- ♿️ **企業級無障礙體驗 (a11y)**：
+  - 內建 `LiveAnnouncer` 動態語音播報主持進度，彈窗對話盒支援 Focus Trap 與鍵盤快捷鍵。
+
+---
+
+## 🛠 技術堆疊
+
+- **前端框架**：React 19 + TypeScript 5
+- **構建工具**：Vite 6.0 (動態代碼分塊 + PWA Service Worker 生成)
+- **樣式與動效**：Tailwind CSS + Framer Motion
+- **狀態管理**：Zustand 5 (模組化切片架構)
+- **音效合成**：Web Audio API 原生物理音效合成（免載入任何 mp3）
+- **觸覺回饋**：Navigator Vibration API
+- **測試體系**：
+  - **Vitest**：52 項單元與整合測試（牌組完整性、洗牌隨機度、角色指派、Zustand 切片、WebRTC 心跳、深色模式、手勢等）
+  - **Playwright**：16 項端到端跨裝置自動化測試（涵蓋 Mobile iPhone 14 與 Desktop Chrome 全流程）
+
+---
+
+## 🚀 常用指令
 
 ```bash
-npx bruno-mcp-server --project-path /absolute/path/to/your/bruno-collection
+# 安裝相依套件
+npm install
+
+# 啟動本地開發伺服器
+npm run dev
+
+# 執行 TypeScript 靜態型別檢查
+npm run typecheck
+
+# 執行單元與整合測試 (Vitest)
+npm test
+
+# 執行端到端跨裝置測試 (Playwright)
+npm run test:e2e
+
+# 生產環境打包編譯
+npm run build
 ```
 
 ---
 
-## Client Configuration
+## 📱 線上體驗
 
-### 1. Cursor
-To configure the server in **Cursor**, open Settings -> Features -> MCP, click **+ Add New MCP Tool**, and fill in the details:
-- **Name**: `bruno`
-- **Type**: `stdio`
-- **Command**: `node /absolute/path/to/bruno-mcp-server/dist/index.js --project-path /absolute/path/to/your/bruno-collection`
-
-### 2. Claude Desktop
-Add this to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "bruno": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/bruno-mcp-server/dist/index.js",
-        "--project-path",
-        "/absolute/path/to/your/bruno-collection"
-      ]
-    }
-  }
-}
-```
-
-## Try the Self-Healing Demo
-
-To see the AI agent automatically debug and heal code using this MCP server:
-
-1. **Start the Mock Server**:
-   ```bash
-   node fixtures/demo/server.js
-   ```
-2. **Introduce a Bug**:
-   Open `fixtures/demo/server.js` and change `payload.email` to `payload.mail` on line 21.
-3. **Ask the AI**:
-   In Cursor or Claude, ask:
-   > *"I just modified the register endpoint in fixtures/demo/server.js. Please use the Bruno MCP tool to run the 'Register' request in fixtures/demo/ to check if it passes."*
-4. **Watch it Heal**:
-   The AI agent will call the MCP tool, detect the `400` failure, inspect `server.js`, fix the typo back to `payload.email`, re-run the request, and confirm the test passes!
-
----
-
-## Tool Reference
-
-### 1. `list_bruno_requests`
-Discovers and lists all `.bru` request files inside the collection root.
-- **Inputs**:
-  - `project_path` (string, optional)
-- **Output**:
-  - A JSON array listing request names, paths, and detected HTTP methods.
-
-### 2. `get_bruno_request_detail`
-Extracts structured request details (URL, headers, body, auth parameters) and raw content.
-- **Inputs**:
-  - `request_name` (string, required) - The name (relative path without extension, or unique basename) of the request.
-  - `project_path` (string, optional)
-
-### 3. `run_bruno_request`
-Runs a request locally through the Bruno CLI and captures status and outputs.
-- **Inputs**:
-  - `request_name` (string, required)
-  - `project_path` (string, optional)
-  - `env` (string, optional) - Target environment defined in your collection.
-  - `env_vars` (object, optional) - Key-value overrides for environment variables.
-
----
-
-## Development & Contribution
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for local setup, testing, and contribution protocols.
-
-## License
-MIT License. See [LICENSE](./LICENSE) for details.
+* **Vercel 線上正式版**：[https://deeply-know-someone.vercel.app](https://deeply-know-someone.vercel.app)

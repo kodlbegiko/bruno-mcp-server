@@ -1,0 +1,13 @@
+raw_assets
+legacy_bruno_mcp
+MyFirstApp
+expense_db
+tests
+playwright-report
+test-results
+*.swift
+*.py
+*.pdf
+*.zip
+*.log
+.playwright
