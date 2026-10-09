@@ -3,9 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBF9F5" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1C1917" />
+    <script>
+      (function() {
+        try {
+          var raw = localStorage.getItem('deeply-know-settings:v1');
+          var theme = 'system';
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (parsed && parsed.theme) theme = parsed.theme;
+          }
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (theme === 'dark' || (theme === 'system' && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="深刻認識" />
@@ -33,7 +49,7 @@
 
     <title>深刻認識一個人 | Deeply Know Someone</title>
   </head>
-  <body class="bg-paper-50 text-ink-900 antialiased selection:bg-paper-200 selection:text-ink-900 min-h-[100dvh]">
+  <body class="bg-paper-50 dark:bg-stone-900 text-ink-900 dark:text-stone-100 antialiased selection:bg-paper-200 selection:text-ink-900 min-h-[100dvh]">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -1,16 +1,17 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGameStore } from './store/gameStore';
 import { useMultiplayerStore } from './store/multiplayerStore';
 import { GameMode, SessionGoalMinutes } from './types/game';
 import { CardLevel } from './types/card';
 import { Home } from './pages/Home';
 import { Setup } from './pages/Setup';
-import { Game } from './pages/Game';
-import { Ending } from './pages/Ending';
 import { OfflineBanner } from './components/ui/OfflineBanner';
 import { LiveAnnouncer } from './components/ui/LiveAnnouncer';
 
-// Code-split multiplayer modules to reduce initial main bundle
+// Code-split heavy routes to minimize initial bundle size
+const Game = lazy(() => import('./pages/Game').then((m) => ({ default: m.Game })));
+const Ending = lazy(() => import('./pages/Ending').then((m) => ({ default: m.Ending })));
 const OnlineLobby = lazy(() =>
   import('./pages/OnlineLobby').then((m) => ({ default: m.OnlineLobby }))
 );
@@ -18,9 +19,22 @@ const WaitingRoom = lazy(() =>
   import('./components/multiplayer/WaitingRoom').then((m) => ({ default: m.WaitingRoom }))
 );
 
+const RouteLoadingFallback: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-[100dvh] bg-paper-50 dark:bg-stone-900 flex items-center justify-center font-serif text-ink-600 dark:text-stone-300 transition-colors">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-6 h-6 border-2 border-stone-300 dark:border-stone-700 border-t-ink-800 dark:border-t-stone-200 rounded-full animate-spin" />
+        <span className="text-sm tracking-wider opacity-80">{t('app.loading')}</span>
+      </div>
+    </div>
+  );
+};
+
 type AppRoute = 'home' | 'setup' | 'game' | 'ending' | 'online-lobby' | 'online-waiting';
 
 export const App: React.FC = () => {
+  const { t } = useTranslation();
   const gameState = useGameStore((s) => s.gameState);
   const resumeGame = useGameStore((s) => s.resumeGame);
   const initGame = useGameStore((s) => s.initGame);
@@ -159,13 +173,7 @@ export const App: React.FC = () => {
       )}
 
       {currentRoute === 'online-lobby' && (
-        <Suspense
-          fallback={
-            <div className="min-h-[100dvh] bg-paper-50 flex items-center justify-center font-serif text-ink-600">
-              載入連線大廳...
-            </div>
-          }
-        >
+        <Suspense fallback={<RouteLoadingFallback />}>
           <OnlineLobby
             initialRoomCode={initialRoomCode}
             onBackToHome={handleBackToHome}
@@ -175,13 +183,7 @@ export const App: React.FC = () => {
       )}
 
       {currentRoute === 'online-waiting' && (
-        <Suspense
-          fallback={
-            <div className="min-h-[100dvh] bg-paper-50 flex items-center justify-center font-serif text-ink-600">
-              載入候車室...
-            </div>
-          }
-        >
+        <Suspense fallback={<RouteLoadingFallback />}>
           <WaitingRoom
             onStartGame={handleHostStartOnlineGame}
             onLeaveRoom={handleLeaveOnlineRoom}
@@ -190,17 +192,21 @@ export const App: React.FC = () => {
       )}
 
       {currentRoute === 'game' && (
-        <Game
-          onBackToHome={handleBackToHome}
-          onGameEnd={handleGameEnd}
-        />
+        <Suspense fallback={<RouteLoadingFallback />}>
+          <Game
+            onBackToHome={handleBackToHome}
+            onGameEnd={handleGameEnd}
+          />
+        </Suspense>
       )}
 
       {currentRoute === 'ending' && (
-        <Ending
-          onPlayAgain={handlePlayAgain}
-          onBackToHome={handleBackToHome}
-        />
+        <Suspense fallback={<RouteLoadingFallback />}>
+          <Ending
+            onPlayAgain={handlePlayAgain}
+            onBackToHome={handleBackToHome}
+          />
+        </Suspense>
       )}
 
       {/* Disconnect & Reconnect Alert Modal for Multiplayer */}
@@ -208,21 +214,21 @@ export const App: React.FC = () => {
         (connectionStatus === 'disconnected' || isReconnecting) &&
         errorMessage &&
         currentRoute !== 'home' && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-ink-900/40 backdrop-blur-xs">
-            <div className="bg-paper-50 p-6 rounded-2xl border border-paper-border max-w-sm w-full text-center space-y-4 shadow-xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-ink-900/50 dark:bg-black/60 backdrop-blur-xs">
+            <div className="bg-paper-50 dark:bg-stone-850 p-6 rounded-2xl border border-paper-border dark:border-stone-700 max-w-sm w-full text-center space-y-4 shadow-xl">
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto text-xl ${
                   isReconnecting
-                    ? 'bg-amber-100 text-amber-700 animate-pulse'
-                    : 'bg-rose-100 text-rose-600'
+                    ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 animate-pulse'
+                    : 'bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'
                 }`}
               >
                 {isReconnecting ? '🔄' : '⚠️'}
               </div>
-              <h3 className="font-serif text-lg font-medium text-ink-900">
-                {isReconnecting ? '正在重新連線...' : '連線已中斷'}
+              <h3 className="font-serif text-lg font-medium text-ink-900 dark:text-stone-100">
+                {isReconnecting ? t('multiplayer.reconnecting') : t('multiplayer.connection_lost')}
               </h3>
-              <p className="text-xs text-ink-600 font-sans leading-relaxed">
+              <p className="text-xs text-ink-600 dark:text-stone-300 font-sans leading-relaxed">
                 {errorMessage}
               </p>
 
@@ -231,9 +237,9 @@ export const App: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => reconnect()}
-                    className="w-full py-2.5 px-4 rounded-xl bg-ink-900 text-paper-50 text-sm font-medium hover:bg-ink-800 transition-colors shadow-sm"
+                    className="w-full py-2.5 px-4 rounded-xl bg-ink-900 dark:bg-stone-100 text-paper-50 dark:text-stone-900 text-sm font-medium hover:bg-ink-800 dark:hover:bg-stone-200 transition-colors shadow-sm"
                   >
-                    手動重新連線
+                    {t('multiplayer.retry')}
                   </button>
                 )}
                 <button
@@ -241,11 +247,11 @@ export const App: React.FC = () => {
                   onClick={handleLeaveOnlineRoom}
                   className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-colors ${
                     !isReconnecting && multiplayerRole === 'guest'
-                      ? 'bg-paper-200/70 text-ink-700 hover:bg-paper-200'
-                      : 'bg-ink-900 text-paper-50 hover:bg-ink-800'
+                      ? 'bg-paper-200/70 dark:bg-stone-750 text-ink-700 dark:text-stone-200 hover:bg-paper-200 dark:hover:bg-stone-700'
+                      : 'bg-ink-900 dark:bg-stone-100 text-paper-50 dark:text-stone-900 hover:bg-ink-800 dark:hover:bg-stone-200'
                   }`}
                 >
-                  返回首頁
+                  {t('multiplayer.back_to_home')}
                 </button>
               </div>
             </div>

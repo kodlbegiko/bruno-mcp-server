@@ -4,7 +4,8 @@
     "subtitle": "A conversation journey into each other's inner worlds through questions and mindful listening.",
     "offline_banner": "Currently offline — Solo mode and cached cards remain fully playable",
     "online_restored": "Connection restored. Synced with latest state.",
-    "close_notice": "Close notice"
+    "close_notice": "Close notice",
+    "loading": "Loading..."
   },
   "home": {
     "start_new": "Start New Conversation",

@@ -4,7 +4,8 @@
     "subtitle": "一場透過問答與傾聽，走進彼此內心深處的對話之旅。",
     "offline_banner": "目前處於離線狀態 — 單機模式與快取卡牌仍可正常遊玩",
     "online_restored": "網路連線已恢復，已同步最新狀態",
-    "close_notice": "關閉提示"
+    "close_notice": "關閉提示",
+    "loading": "載入中..."
   },
   "home": {
     "start_new": "開啟新對話",

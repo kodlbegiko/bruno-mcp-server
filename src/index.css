@@ -22,6 +22,11 @@ body {
   overscroll-behavior-y: none;
 }
 
+html.dark body {
+  background-color: #1C1917;
+  color: #F5F2EB;
+}
+
 /* 3D Card Flip Perspective */
 .perspective-1000 {
   perspective: 1000px;

@@ -38,6 +38,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,webp,png,svg,wav,json,woff,woff2}'],
+        globIgnores: ['**/og-image.png', '**/QrScannerModal*.*'],
         runtimeCaching: [
           {
             urlPattern: ({ request }) =>
@@ -82,6 +83,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
+          vendor: ['react', 'react-dom', 'zustand', 'i18next', 'react-i18next'],
           peerjs: ['peerjs'],
           qrcode: ['qrcode'],
           framer: ['framer-motion'],

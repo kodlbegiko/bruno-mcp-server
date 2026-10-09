@@ -41,24 +41,24 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ isOpen, onClose, roomC
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="邀請朋友加入房間">
       <div className="flex flex-col items-center text-center space-y-4 py-2">
-        <div className="bg-paper-100 p-3 rounded-2xl border border-paper-border shadow-xs">
+        <div className="bg-paper-100 dark:bg-stone-850 p-3 rounded-2xl border border-paper-border dark:border-stone-700 shadow-xs">
           {qrDataUrl ? (
             <img src={qrDataUrl} alt="房間 QR Code" className="w-56 h-56 rounded-xl mx-auto" />
           ) : (
-            <div className="w-56 h-56 flex items-center justify-center text-xs text-ink-400">
+            <div className="w-56 h-56 flex items-center justify-center text-xs text-ink-400 dark:text-stone-500">
               產生 QR Code 中...
             </div>
           )}
         </div>
 
         <div>
-          <span className="text-xs text-ink-500 font-sans block mb-1">房間代碼</span>
-          <span className="text-2xl font-mono font-bold tracking-widest text-ink-900 bg-paper-200/80 px-4 py-1.5 rounded-xl border border-paper-border">
+          <span className="text-xs text-ink-500 dark:text-stone-400 font-sans block mb-1">房間代碼</span>
+          <span className="text-2xl font-mono font-bold tracking-widest text-ink-900 dark:text-stone-100 bg-paper-200/80 dark:bg-stone-800 px-4 py-1.5 rounded-xl border border-paper-border dark:border-stone-700">
             {roomCode}
           </span>
         </div>
 
-        <p className="text-xs text-ink-600 font-serif leading-relaxed max-w-xs">
+        <p className="text-xs text-ink-600 dark:text-stone-300 font-serif leading-relaxed max-w-xs">
           朋友用手機相機掃描 QR Code，即可直接打開遊戲並自動加入房間！
         </p>
 

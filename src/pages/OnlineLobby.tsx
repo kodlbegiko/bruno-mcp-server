@@ -84,25 +84,25 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
   };
 
   return (
-    <div className="min-h-[100dvh] bg-paper-50 flex flex-col justify-between px-4 py-5 sm:py-8 safe-top safe-bottom max-w-md mx-auto w-full">
+    <div className="min-h-[100dvh] bg-paper-50 dark:bg-stone-900 flex flex-col justify-between px-4 py-5 sm:py-8 safe-top safe-bottom max-w-md mx-auto w-full transition-colors">
       {/* Top Header */}
-      <header className="flex items-center justify-between pb-3 border-b border-paper-border/60">
+      <header className="flex items-center justify-between pb-3 border-b border-paper-border/60 dark:border-stone-800">
         <button
           type="button"
           onClick={onBackToHome}
-          className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-ink-600 hover:text-ink-900 py-1 px-2 rounded-lg hover:bg-paper-200/50 transition-colors"
+          className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-ink-600 dark:text-stone-400 hover:text-ink-900 dark:hover:text-stone-100 py-1 px-2 rounded-lg hover:bg-paper-200/50 dark:hover:bg-stone-800/50 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           <span className="font-serif">回首頁</span>
         </button>
-        <h2 className="font-serif font-medium text-ink-900 text-base">多人連線大廳</h2>
+        <h2 className="font-serif font-medium text-ink-900 dark:text-stone-100 text-base">多人連線大廳</h2>
         <div className="w-12" />
       </header>
 
       {/* Mode Tabs */}
-      <div className="flex bg-paper-200/60 p-1 rounded-2xl my-4 border border-paper-border">
+      <div className="flex bg-paper-200/60 dark:bg-stone-800/60 p-1 rounded-2xl my-4 border border-paper-border dark:border-stone-700">
         <button
           type="button"
           onClick={() => {
@@ -111,8 +111,8 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
           }}
           className={`flex-1 py-2 text-xs sm:text-sm font-medium rounded-xl transition-all ${
             activeTab === 'create'
-              ? 'bg-paper-50 text-ink-900 shadow-xs'
-              : 'text-ink-600 hover:text-ink-900'
+              ? 'bg-paper-50 dark:bg-stone-700 text-ink-900 dark:text-stone-100 shadow-xs'
+              : 'text-ink-600 dark:text-stone-400 hover:text-ink-900 dark:hover:text-stone-100'
           }`}
         >
           建立房間 (房主)
@@ -125,8 +125,8 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
           }}
           className={`flex-1 py-2 text-xs sm:text-sm font-medium rounded-xl transition-all ${
             activeTab === 'join'
-              ? 'bg-paper-50 text-ink-900 shadow-xs'
-              : 'text-ink-600 hover:text-ink-900'
+              ? 'bg-paper-50 dark:bg-stone-700 text-ink-900 dark:text-stone-100 shadow-xs'
+              : 'text-ink-600 dark:text-stone-400 hover:text-ink-900 dark:hover:text-stone-100'
           }`}
         >
           加入房間
@@ -135,12 +135,12 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
 
       {/* Error notification */}
       {errorMessage && (
-        <div className="p-3.5 mb-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start justify-between">
+        <div className="p-3.5 mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-800 dark:text-rose-200 flex items-start justify-between">
           <span>{errorMessage}</span>
           <button
             type="button"
             onClick={clearError}
-            className="text-rose-500 hover:text-rose-800 ml-2 font-bold"
+            className="text-rose-500 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-200 ml-2 font-bold"
           >
             ✕
           </button>
@@ -152,8 +152,8 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
         {activeTab === 'create' ? (
           <div className="space-y-5">
             {/* Host Name */}
-            <div className="bg-paper-100/60 p-4 rounded-2xl border border-paper-border">
-              <label className="block text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2">
+            <div className="bg-paper-100/60 dark:bg-stone-850 p-4 rounded-2xl border border-paper-border dark:border-stone-800">
+              <label className="block text-xs font-semibold text-ink-500 dark:text-stone-400 uppercase tracking-wider mb-2">
                 你的暱稱
               </label>
               <input
@@ -162,12 +162,12 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
                 onChange={(e) => setHostName(e.target.value)}
                 placeholder="房主"
                 maxLength={20}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-paper-border bg-paper-50 focus:bg-white text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none focus:ring-1 focus:ring-ink-900 focus:border-ink-900 transition-colors"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-paper-border dark:border-stone-700 bg-paper-50 dark:bg-stone-800 focus:bg-white dark:focus:bg-stone-750 text-sm text-ink-900 dark:text-stone-100 placeholder:text-ink-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-1 focus:ring-ink-900 dark:focus:ring-stone-400 focus:border-ink-900 dark:focus:border-stone-400 transition-colors"
               />
             </div>
 
             {/* Mode selection */}
-            <div className="bg-paper-100/60 p-4 rounded-2xl border border-paper-border">
+            <div className="bg-paper-100/60 dark:bg-stone-850 p-4 rounded-2xl border border-paper-border dark:border-stone-800">
               <ModeSelector
                 mode={mode}
                 onChangeMode={setMode}
@@ -177,7 +177,7 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
             </div>
 
             {/* Session goal */}
-            <div className="bg-paper-100/60 p-4 rounded-2xl border border-paper-border">
+            <div className="bg-paper-100/60 dark:bg-stone-850 p-4 rounded-2xl border border-paper-border dark:border-stone-800">
               <SessionLengthSelector
                 sessionGoal={sessionGoal}
                 onChangeSessionGoal={setSessionGoal}
@@ -187,9 +187,9 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
         ) : (
           <div className="space-y-4 py-4">
             {/* Room Code input */}
-            <div className="bg-paper-100/60 p-5 rounded-2xl border border-paper-border space-y-3">
+            <div className="bg-paper-100/60 dark:bg-stone-850 p-5 rounded-2xl border border-paper-border dark:border-stone-800 space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-ink-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-ink-500 dark:text-stone-400 uppercase tracking-wider mb-1.5">
                   輸入 6 碼房間代碼
                 </label>
                 <input
@@ -198,7 +198,7 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
                   onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
                   placeholder="例如：B8K2X9"
                   maxLength={10}
-                  className="w-full px-4 py-3 rounded-xl border border-paper-border bg-paper-50 focus:bg-white text-lg font-mono font-bold tracking-widest text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-1 focus:ring-ink-900 focus:border-ink-900 transition-colors text-center uppercase"
+                  className="w-full px-4 py-3 rounded-xl border border-paper-border dark:border-stone-700 bg-paper-50 dark:bg-stone-800 focus:bg-white dark:focus:bg-stone-750 text-lg font-mono font-bold tracking-widest text-ink-900 dark:text-stone-100 placeholder:text-ink-300 dark:placeholder:text-stone-600 focus:outline-none focus:ring-1 focus:ring-ink-900 dark:focus:ring-stone-400 focus:border-ink-900 dark:focus:border-stone-400 transition-colors text-center uppercase"
                 />
 
                 <Button
@@ -215,7 +215,7 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-ink-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-ink-500 dark:text-stone-400 uppercase tracking-wider mb-1.5">
                   你的暱稱
                 </label>
                 <input
@@ -224,12 +224,12 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
                   onChange={(e) => setGuestName(e.target.value)}
                   placeholder="旅人"
                   maxLength={20}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-paper-border bg-paper-50 focus:bg-white text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none focus:ring-1 focus:ring-ink-900 focus:border-ink-900 transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-paper-border dark:border-stone-700 bg-paper-50 dark:bg-stone-800 focus:bg-white dark:focus:bg-stone-750 text-sm text-ink-900 dark:text-stone-100 placeholder:text-ink-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-1 focus:ring-ink-900 dark:focus:ring-stone-400 focus:border-ink-900 dark:focus:border-stone-400 transition-colors"
                 />
               </div>
             </div>
 
-            <p className="text-xs text-ink-500 font-serif leading-relaxed text-center px-4">
+            <p className="text-xs text-ink-500 dark:text-stone-400 font-serif leading-relaxed text-center px-4">
               如果你收到朋友傳送的專屬連結，點擊即可自動填入代碼並進入房間。
             </p>
           </div>
@@ -237,7 +237,7 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
       </main>
 
       {/* Footer CTA */}
-      <footer className="pt-3 border-t border-paper-border/60">
+      <footer className="pt-3 border-t border-paper-border/60 dark:border-stone-800">
         {activeTab === 'create' ? (
           <Button
             variant="primary"
