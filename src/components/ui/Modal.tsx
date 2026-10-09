@@ -112,6 +112,7 @@ export const Modal: React.FC<ModalProps> = ({
             tabIndex={-1}
             role="dialog"
             aria-modal="true"
+            aria-labelledby={title ? 'modal-dialog-title' : undefined}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -120,7 +121,7 @@ export const Modal: React.FC<ModalProps> = ({
           >
             {title && (
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-paper-border dark:border-stone-700">
-                <h3 className="text-lg font-serif font-medium text-ink-900 dark:text-stone-100">{title}</h3>
+                <h3 id="modal-dialog-title" className="text-lg font-serif font-medium text-ink-900 dark:text-stone-100">{title}</h3>
                 {showCloseButton && onClose && (
                   <button
                     onClick={onClose}

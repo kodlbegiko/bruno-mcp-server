@@ -55,10 +55,9 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
   const elapsedMinutes = Math.max(1, Math.round((endedTime - gameState.startedAt) / (60 * 1000)));
 
   // Calculate cards revealed count
-  const revealedCount =
-    (gameState.revealedCardIds && gameState.revealedCardIds.length > 0)
-      ? gameState.revealedCardIds.length
-      : gameState.cardsDrawnCount;
+  const revealedCount = Array.isArray(gameState.revealedCardIds)
+    ? gameState.revealedCardIds.length
+    : gameState.cardsDrawnCount;
 
   // Calculate highest level actually revealed
   const levelsPlayed = (['three-star', 'two-star', 'one-star', 'icebreaker'] as const);

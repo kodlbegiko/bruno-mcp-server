@@ -3,9 +3,10 @@ import { useGameStore } from '../src/store/gameStore';
 import { clearGameState } from '../src/game/persistence';
 import { Player } from '../src/types/player';
 import { useMultiplayerStore } from '../src/store/multiplayerStore';
-import { handleHostIncomingMessage } from '../src/store/multiplayer/messageHandlers';
+import { handleHostIncomingMessage, handleGuestIncomingMessage } from '../src/store/multiplayer/messageHandlers';
 import { executeHostAction } from '../src/store/multiplayer/actionHandlers';
 import { OnlinePlayer } from '../src/types/multiplayer';
+import { trackEvent, resetSessionTimer, getSessionMetrics } from '../src/utils/analytics';
 
 describe('Game State Semantics & Multiplayer Authority Suite', () => {
   const twoPlayers: Player[] = [
@@ -308,6 +309,222 @@ describe('Game State Semantics & Multiplayer Authority Suite', () => {
       // Remained in 2-star / not promoted
       expect(useGameStore.getState().gameState?.currentLevel).not.toBe('three-star');
       expect(useGameStore.getState().showThreeStarConsent).toBe(false);
+    });
+  });
+
+  describe('Connection Identity Authority & Token Reconnection Hardening', () => {
+    it('strictly identifies message sender by connection peer and rejects spoofed senderId', () => {
+      useGameStore.getState().initGame(twoPlayers, 'guided', null);
+      const hostPlayer: OnlinePlayer = { id: 'p_host', name: 'Host', isHost: true, peerId: 'peer_host' };
+      const guestPlayer: OnlinePlayer = { id: 'p_guest', name: 'Guest Attacker', isHost: false, peerId: 'peer_attacker' };
+
+      const mockConn = {
+        peer: 'peer_attacker', // physical connection is the guest attacker
+        send: vi.fn(),
+        close: vi.fn(),
+      } as any;
+
+      const mockCtx = {
+        myPlayerId: 'p_host',
+        roomCode: 'ABCD',
+        players: [hostPlayer, guestPlayer],
+        isGameStarted: true,
+        setPlayers: vi.fn(),
+        broadcastState: vi.fn(),
+      };
+
+      // Attacker sends CLIENT_ACTION claiming senderId is 'p_host' to trigger END_GAME
+      handleHostIncomingMessage(
+        mockConn,
+        {
+          type: 'CLIENT_ACTION',
+          senderId: 'p_host', // SPOOFED SENDER ID!
+          payload: { action: 'END_GAME' },
+        },
+        mockCtx
+      );
+
+      // Game state must NOT be ended because connection peer is peer_attacker (not host!)
+      expect(useGameStore.getState().gameState?.status).toBe('playing');
+    });
+
+    it('issues reconnectToken on JOIN_REQUEST and rejects RECONNECT_REQUEST with invalid token', () => {
+      const mockConn = {
+        peer: 'peer_new_guest',
+        send: vi.fn(),
+        close: vi.fn(),
+      } as any;
+
+      let roomPlayers: OnlinePlayer[] = [
+        { id: 'p_host', name: 'Host', isHost: true, peerId: 'peer_host' },
+      ];
+
+      const mockCtx = {
+        myPlayerId: 'p_host',
+        roomCode: 'TEST',
+        players: roomPlayers,
+        isGameStarted: false,
+        setPlayers: (p: OnlinePlayer[]) => {
+          roomPlayers = p;
+          mockCtx.players = p;
+        },
+        broadcastState: vi.fn(),
+      };
+
+      // Guest sends JOIN_REQUEST
+      handleHostIncomingMessage(
+        mockConn,
+        {
+          type: 'JOIN_REQUEST',
+          senderId: 'peer_new_guest',
+          payload: { playerName: 'Charlie' },
+        },
+        mockCtx
+      );
+
+      expect(mockConn.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'JOIN_ACCEPTED',
+          payload: expect.objectContaining({
+            reconnectToken: expect.any(String),
+          }),
+        })
+      );
+
+      const acceptedCall = mockConn.send.mock.calls.find(
+        (c: any[]) => c[0].type === 'JOIN_ACCEPTED'
+      );
+      const validToken = acceptedCall[0].payload.reconnectToken;
+      const guestPlayerId = acceptedCall[0].payload.myPlayerId;
+
+      // Now guest tries to reconnect with an INVALID token
+      const reconnectConn = {
+        peer: 'peer_reconnected',
+        send: vi.fn(),
+        close: vi.fn(),
+      } as any;
+
+      handleHostIncomingMessage(
+        reconnectConn,
+        {
+          type: 'RECONNECT_REQUEST',
+          senderId: guestPlayerId,
+          payload: {
+            playerId: guestPlayerId,
+            reconnectToken: 'WRONG_FORGED_TOKEN',
+          },
+        },
+        mockCtx
+      );
+
+      // Must be rejected with RECONNECT_REJECTED!
+      expect(reconnectConn.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'RECONNECT_REJECTED',
+        })
+      );
+
+      // Now guest reconnects with the VALID token
+      const validReconnectConn = {
+        peer: 'peer_valid_reconnect',
+        send: vi.fn(),
+        close: vi.fn(),
+      } as any;
+
+      handleHostIncomingMessage(
+        validReconnectConn,
+        {
+          type: 'RECONNECT_REQUEST',
+          senderId: guestPlayerId,
+          payload: {
+            playerId: guestPlayerId,
+            reconnectToken: validToken,
+          },
+        },
+        mockCtx
+      );
+
+      // Must be accepted!
+      expect(validReconnectConn.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'JOIN_ACCEPTED',
+          payload: expect.objectContaining({
+            myPlayerId: guestPlayerId,
+            reconnectToken: validToken,
+          }),
+        })
+      );
+    });
+
+    it('triggers onJoinRejected callback when guest receives JOIN_REJECTED or RECONNECT_REJECTED', () => {
+      const onJoinSuccess = vi.fn();
+      const onJoinRejected = vi.fn();
+      const updateGuestState = vi.fn();
+
+      handleGuestIncomingMessage(
+        {
+          type: 'RECONNECT_REJECTED',
+          senderId: 'host',
+          payload: { reason: '驗證失敗' },
+        },
+        {
+          onJoinSuccess,
+          onJoinRejected,
+          updateGuestState,
+        }
+      );
+
+      expect(onJoinRejected).toHaveBeenCalledWith(expect.any(Error));
+      expect(updateGuestState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectionStatus: 'error',
+          errorMessage: '驗證失敗',
+        })
+      );
+    });
+
+    it('preserves initial drawer (Player 1) when starting directly on 3-star', () => {
+      // Free play starting directly at three-star
+      useGameStore.getState().initGame(twoPlayers, 'free', null, 'three-star');
+      const stateBefore = useGameStore.getState().gameState;
+
+      expect(stateBefore?.cardsDrawnCount).toBe(0);
+      expect(stateBefore?.drawerIndex).toBe(0);
+      expect(useGameStore.getState().showThreeStarConsent).toBe(true);
+
+      // Confirm consent
+      useGameStore.getState().confirmThreeStarConsent();
+
+      const stateAfter = useGameStore.getState().gameState;
+      expect(stateAfter?.currentLevel).toBe('three-star');
+      expect(stateAfter?.threeStarConsentSeen).toBe(true);
+      // Drawer must STILL be Player 1 (drawerIndex 0), NOT skipped to Player 2!
+      expect(stateAfter?.drawerIndex).toBe(0);
+      expect(stateAfter?.cardsDrawnCount).toBe(1);
+    });
+
+    it('deduplicates first_card_flip analytics and resets session timer on initGame', () => {
+      resetSessionTimer();
+      trackEvent('first_card_flip', { cardId: 'ice-01' });
+      const metricsAfterFirst = getSessionMetrics();
+      const initialCount = metricsAfterFirst.events.filter((e) => e.event === 'first_card_flip').length;
+      expect(initialCount).toBe(1);
+
+      // Subsequent first_card_flip calls should NOT add duplicate events
+      trackEvent('first_card_flip', { cardId: 'ice-02' });
+      const metricsAfterSecond = getSessionMetrics();
+      const secondCount = metricsAfterSecond.events.filter((e) => e.event === 'first_card_flip').length;
+      expect(secondCount).toBe(1);
+
+      // When a new game initializes, session timer resets
+      useGameStore.getState().initGame(twoPlayers, 'guided', null);
+      const metricsAfterReset = getSessionMetrics();
+      expect(metricsAfterReset.hasFirstCardFlipped).toBe(false);
+
+      // Now first_card_flip can be tracked once again
+      trackEvent('first_card_flip', { cardId: 'ice-03' });
+      const metricsAfterNewGame = getSessionMetrics();
+      expect(metricsAfterNewGame.hasFirstCardFlipped).toBe(true);
     });
   });
 });

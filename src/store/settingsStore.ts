@@ -14,8 +14,11 @@ interface SettingsStore extends SettingsState {
 
 const initial = loadSettings();
 
-// Apply stored theme on script load
+// Apply stored theme and language on script load
 applyTheme(initial.theme);
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = initial.language || 'zh-TW';
+}
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
   ...initial,
@@ -38,6 +41,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   setLanguage: (language) => {
     set({ language });
     i18n.changeLanguage(language);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = language;
+    }
     saveSettings({ ...get(), language });
   },
   setTheme: (theme) => {

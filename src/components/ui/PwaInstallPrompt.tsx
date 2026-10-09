@@ -61,7 +61,11 @@ export const PwaInstallPrompt: React.FC = () => {
       const raw = localStorage.getItem('deeply-know-game:v1');
       if (raw) {
         const parsed = JSON.parse(raw);
-        return (parsed?.cardsDrawnCount || 0) >= 5 || (parsed?.history?.length || 0) >= 5;
+        return (
+          parsed?.status === 'ended' ||
+          (parsed?.revealedCardIds?.length || 0) >= 4 ||
+          (parsed?.cardsDrawnCount || 0) >= 5
+        );
       }
     } catch {
       // ignore

@@ -29,6 +29,7 @@ export interface MultiplayerStore {
   errorMessage: string | null;
   isReconnecting: boolean;
   reconnectAttempt: number;
+  reconnectToken: string | null;
   threeStarConsent: ThreeStarConsentState | null;
 
   createRoom: (hostName: string) => Promise<string>;
@@ -55,6 +56,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
   errorMessage: null,
   isReconnecting: false,
   reconnectAttempt: 0,
+  reconnectToken: null,
   threeStarConsent: null,
   setThreeStarConsent: (consent) => set({ threeStarConsent: consent }),
 
@@ -86,7 +88,8 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
       errorMessage: null,
       isReconnecting: false,
       reconnectAttempt: 0,
-      players: [{ id: hostPlayerId, name, isHost: true, peerId: hostPeerId }],
+      reconnectToken: null,
+      players: [{ id: hostPlayerId, name, isHost: true, peerId: hostPeerId, connectionStatus: 'connected' }],
     });
 
     try {
@@ -169,6 +172,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
       errorMessage: null,
       isReconnecting: false,
       reconnectAttempt: 0,
+      reconnectToken: null,
       players: [],
     });
 
@@ -213,6 +217,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
             const message = data as PeerMessage;
             handleGuestIncomingMessage(message, {
               onJoinSuccess: resolve,
+              onJoinRejected: reject,
               updateGuestState: (state) => set(state),
             });
           });
@@ -304,24 +309,45 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
   },
 
   sendAction: (actionPayload: ClientActionPayload) => {
-    const { role, isOnlineMode } = get();
+    const { role, isOnlineMode, myPlayerId } = get();
     if (!isOnlineMode) return;
 
     if (role === 'host') {
-      executeHostAction(actionPayload);
+      executeHostAction(actionPayload, {
+        actorPlayerId: myPlayerId || 'host',
+        isHost: true,
+      });
       get().broadcastState();
     } else if (role === 'guest') {
       peerManager.sendToHost({
         type: 'CLIENT_ACTION',
-        senderId: get().myPlayerId || '',
+        senderId: myPlayerId || '',
         payload: actionPayload,
       });
     }
   },
 
   leaveRoom: () => {
+    if (get().role === 'host') {
+      try {
+        peerManager.broadcastToGuests({
+          type: 'ROOM_CLOSED',
+          senderId: get().myPlayerId || 'host',
+          payload: { reason: '房主已離開房間。' },
+        });
+      } catch {}
+    }
+
     peerManager.setManualLeave(true);
     peerManager.cleanup();
+
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.removeItem('dks_reconnect_token');
+        sessionStorage.removeItem('dks_player_id');
+        sessionStorage.removeItem('dks_room_code');
+      } catch {}
+    }
 
     set({
       isOnlineMode: false,
@@ -329,6 +355,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
       role: null,
       roomCode: null,
       myPlayerId: null,
+      reconnectToken: null,
       players: [],
       connectionStatus: 'disconnected',
       errorMessage: null,
@@ -426,11 +453,23 @@ function performGuestReconnect() {
           }
         );
 
+        const reconnectToken =
+          state.reconnectToken ||
+          (typeof window !== 'undefined'
+            ? sessionStorage.getItem('dks_reconnect_token')
+            : null);
+        const guestPlayerId =
+          state.myPlayerId ||
+          (typeof window !== 'undefined'
+            ? sessionStorage.getItem('dks_player_id')
+            : null);
+
         conn.send({
           type: 'RECONNECT_REQUEST',
-          senderId: state.myPlayerId || guestPeerId,
+          senderId: guestPlayerId || guestPeerId,
           payload: {
-            playerId: state.myPlayerId,
+            playerId: guestPlayerId,
+            reconnectToken: reconnectToken || undefined,
             playerName: state.myPlayerName,
           },
         } as PeerMessage);

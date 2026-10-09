@@ -49,7 +49,10 @@ export function trackEvent(event: AnalyticsEventType, payload?: AnalyticsPayload
 
   // If first card flip, calculate time to first card
   let enrichedPayload = { ...payload };
-  if (event === 'first_card_flip' && !hasFirstCardFlipped) {
+  if (event === 'first_card_flip') {
+    if (hasFirstCardFlipped) {
+      return;
+    }
     hasFirstCardFlipped = true;
     const timeToFirstCardMs = sessionStartTime > 0 ? timestamp - sessionStartTime : 0;
     enrichedPayload = {

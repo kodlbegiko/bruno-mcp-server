@@ -5,6 +5,7 @@ import { GameMode, GameState, SessionGoalMinutes } from '../types/game';
 import { deckCards, getCardById } from '../data/decks';
 import { createShuffledDeck } from '../game/shuffle';
 import { clearGameState, loadGameState, saveGameState } from '../game/persistence';
+import { resetSessionTimer } from '../utils/analytics';
 
 interface GameStore {
   // State
@@ -59,6 +60,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   selectedPlayerIds: [],
 
   initGame: (players, mode, sessionGoalMinutes, startingLevel) => {
+    resetSessionTimer();
     const playerCount = players.length;
     const decks = initializeDecks(playerCount);
     const startLevel: CardLevel = mode === 'free' && startingLevel ? startingLevel : 'icebreaker';
@@ -293,7 +295,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       nextCardId = null;
     }
 
-    const nextDrawerIndex = (state.drawerIndex + 1) % state.players.length;
+    const isInitialDeal = state.cardsDrawnCount === 0;
+    const nextDrawerIndex = isInitialDeal
+      ? state.drawerIndex
+      : (state.drawerIndex + 1) % state.players.length;
 
     const updatedState: GameState = {
       ...state,

@@ -133,6 +133,19 @@ export const App: React.FC = () => {
       hostSessionGoal,
       hostGameMode === 'free' ? hostStartingLevel : 'icebreaker'
     );
+
+    const isDirectThreeStar = hostGameMode === 'free' && hostStartingLevel === 'three-star';
+    if (isDirectThreeStar) {
+      useMultiplayerStore.setState({
+        threeStarConsent: {
+          status: 'pending',
+          requiredPlayerIds: onlinePlayers.map((p) => p.id),
+          acceptedPlayerIds: [],
+          declinedPlayerIds: [],
+        },
+      });
+    }
+
     // Broadcast newly initiated game state to all connected peers
     broadcastState();
     setCurrentRoute('game');

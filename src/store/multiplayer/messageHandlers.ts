@@ -69,12 +69,15 @@ export function handleHostIncomingMessage(
 
       const guestName = message.payload?.playerName || '旅人';
       const guestPlayerId = `player_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const reconnectToken = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
 
       const newPlayer: OnlinePlayer = {
         id: guestPlayerId,
         name: guestName,
         isHost: false,
         peerId: conn.peer,
+        reconnectToken,
+        connectionStatus: 'connected',
       };
 
       const updatedPlayers = [...ctx.players, newPlayer];
@@ -85,6 +88,7 @@ export function handleHostIncomingMessage(
         senderId: ctx.myPlayerId || 'host',
         payload: {
           myPlayerId: guestPlayerId,
+          reconnectToken,
           roomCode: ctx.roomCode,
           players: updatedPlayers,
           gameState: ctx.isGameStarted ? useGameStore.getState().gameState : null,
@@ -105,22 +109,28 @@ export function handleHostIncomingMessage(
 
     case 'RECONNECT_REQUEST': {
       const guestPlayerId = message.payload?.playerId;
-      const guestName = message.payload?.playerName || '旅人';
+      const reconnectToken = message.payload?.reconnectToken;
 
-      let existingPlayer = ctx.players.find((p) => p.id === guestPlayerId);
-      let updatedPlayers = [...ctx.players];
+      const existingPlayer = ctx.players.find((p) => p.id === guestPlayerId);
 
-      if (existingPlayer) {
-        existingPlayer.peerId = conn.peer;
-      } else {
-        existingPlayer = {
-          id: guestPlayerId || `player_${Date.now()}`,
-          name: guestName,
-          isHost: false,
-          peerId: conn.peer,
-        };
-        updatedPlayers.push(existingPlayer);
+      // Verify slot existence and reconnect token authenticity!
+      // NEVER create an unknown player in RECONNECT_REQUEST!
+      if (
+        !existingPlayer ||
+        (existingPlayer.reconnectToken && existingPlayer.reconnectToken !== reconnectToken)
+      ) {
+        conn.send({
+          type: 'RECONNECT_REJECTED',
+          senderId: ctx.myPlayerId || 'host',
+          payload: { reason: '重新連線驗證失敗或玩家紀錄不存在，請重新加入房間。' },
+        } as PeerMessage);
+        setTimeout(() => conn.close(), 500);
+        break;
       }
+
+      existingPlayer.peerId = conn.peer;
+      existingPlayer.connectionStatus = 'connected';
+      const updatedPlayers = [...ctx.players];
 
       peerManager.getHostConnections().set(conn.peer, conn);
       ctx.setPlayers(updatedPlayers);
@@ -130,6 +140,7 @@ export function handleHostIncomingMessage(
         senderId: ctx.myPlayerId || 'host',
         payload: {
           myPlayerId: existingPlayer.id,
+          reconnectToken: existingPlayer.reconnectToken,
           roomCode: ctx.roomCode,
           players: updatedPlayers,
           gameState: ctx.isGameStarted ? useGameStore.getState().gameState : null,
@@ -149,18 +160,14 @@ export function handleHostIncomingMessage(
     }
 
     case 'CLIENT_ACTION': {
-      const sender = ctx.players.find(
-        (p) => p.peerId === conn.peer || p.id === message.senderId
-      );
+      // Authenticate sender strictly by WebRTC peer connection! NEVER trust message.senderId!
+      const sender = ctx.players.find((p) => p.peerId === conn.peer);
       if (!sender) {
-        console.warn('[Host Rejected Action] Unknown sender:', message.senderId);
+        console.warn('[Host Rejected Action] Unknown connection peer:', conn.peer);
         break;
       }
 
       const actionPayload = message.payload as ClientActionPayload;
-      if (!actionPayload.playerId) {
-        actionPayload.playerId = sender.id;
-      }
       const currentGameState = useGameStore.getState().gameState;
 
       // Host-only authority verification
@@ -197,7 +204,10 @@ export function handleHostIncomingMessage(
         }
       }
 
-      executeHostAction(actionPayload);
+      executeHostAction(actionPayload, {
+        actorPlayerId: sender.id,
+        isHost: sender.isHost,
+      });
       ctx.broadcastState();
       break;
     }
@@ -206,8 +216,10 @@ export function handleHostIncomingMessage(
 
 export interface GuestMessageContext {
   onJoinSuccess?: (val: any) => void;
+  onJoinRejected?: (err: Error) => void;
   updateGuestState: (data: {
     myPlayerId?: string;
+    reconnectToken?: string;
     roomCode?: string;
     players?: OnlinePlayer[];
     errorMessage?: string | null;
@@ -238,19 +250,25 @@ export function handleGuestIncomingMessage(
       break;
     }
 
-    case 'JOIN_REJECTED': {
+    case 'JOIN_REJECTED':
+    case 'RECONNECT_REJECTED': {
+      peerManager.setManualLeave(true); // Stop auto-reconnect loop immediately
       peerManager.stopHeartbeat();
-      const reason = message.payload?.reason || '無法加入房間。';
+      const reason = message.payload?.reason || '加入或重新連線房間被拒絕。';
       ctx.updateGuestState({
         connectionStatus: 'error',
         errorMessage: reason,
       });
+      if (ctx.onJoinRejected) {
+        ctx.onJoinRejected(new Error(reason));
+      }
       break;
     }
 
     case 'JOIN_ACCEPTED': {
       const {
         myPlayerId,
+        reconnectToken,
         roomCode,
         players,
         gameState,
@@ -262,11 +280,22 @@ export function handleGuestIncomingMessage(
 
       ctx.updateGuestState({
         myPlayerId,
+        reconnectToken,
         roomCode,
         players,
         connectionStatus: 'connected',
         errorMessage: null,
       });
+
+      if (typeof window !== 'undefined' && reconnectToken) {
+        try {
+          sessionStorage.setItem('dks_reconnect_token', reconnectToken);
+          sessionStorage.setItem('dks_player_id', myPlayerId);
+          sessionStorage.setItem('dks_room_code', roomCode);
+        } catch {
+          // ignore
+        }
+      }
 
       if (threeStarConsent !== undefined) {
         useMultiplayerStore.setState({ threeStarConsent: threeStarConsent ?? null });
@@ -328,7 +357,17 @@ export function handleGuestIncomingMessage(
       break;
     }
 
+    case 'SESSION_RESET': {
+      useGameStore.getState().resetGame();
+      ctx.updateGuestState({
+        connectionStatus: 'connected',
+        errorMessage: '房主已重設本局遊戲。',
+      });
+      break;
+    }
+
     case 'ROOM_CLOSED': {
+      peerManager.setManualLeave(true); // Stop auto reconnect loops
       peerManager.stopHeartbeat();
       ctx.updateGuestState({
         connectionStatus: 'disconnected',

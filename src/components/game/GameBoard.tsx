@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../store/gameStore';
 import { useSettingsStore } from '../../store/settingsStore';
-import { getCardById, totalDeckCounts } from '../../data/decks';
+import { getCardById } from '../../data/decks';
 import { resolveInteraction } from '../../game/interaction';
 import { LEVEL_NAMES, getNextLevel } from '../../game/progression';
 import { playSlideSound } from '../../utils/sound';
@@ -112,7 +112,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
   const currentDeck = gameState.decks[currentLevel];
   const isDeckEmpty = !currentCard;
-  const cardsDrawnInLevel = currentDeck.cursor;
+  const cardsDrawnInLevel = (gameState.revealedCardIds || []).filter(
+    (id) => getCardById(id)?.level === currentLevel
+  ).length;
 
   // Zero-latency prefetching: Warm up card back assets in background
   useEffect(() => {
@@ -272,7 +274,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
               {currentLevelInfo.zh}
             </span>
             <span className="text-[11px] font-mono text-ink-500 dark:text-stone-400">
-              {currentDeck.cursor}/{totalDeckCounts[currentLevel]}
+              {currentDeck.cursor}/{currentDeck.shuffledIds.length}
             </span>
           </button>
         </div>

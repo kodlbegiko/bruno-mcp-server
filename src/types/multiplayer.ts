@@ -9,6 +9,8 @@ export interface OnlinePlayer {
   isHost: boolean;
   peerId: string;
   isReady?: boolean;
+  reconnectToken?: string;
+  connectionStatus?: 'connected' | 'reconnecting' | 'disconnected';
 }
 
 export type PeerMessageType =
@@ -16,10 +18,12 @@ export type PeerMessageType =
   | 'JOIN_ACCEPTED'
   | 'JOIN_REJECTED'
   | 'RECONNECT_REQUEST'
+  | 'RECONNECT_REJECTED'
   | 'PLAYER_LIST_UPDATE'
   | 'GAME_START'
   | 'SYNC_STATE'
   | 'CLIENT_ACTION'
+  | 'SESSION_RESET'
   | 'ROOM_CLOSED'
   | 'PING'
   | 'PONG';
@@ -38,6 +42,7 @@ export type ClientActionType =
 export interface ClientActionPayload {
   action: ClientActionType;
   level?: CardLevel;
+  targetPlayerId?: string;
   playerId?: string;
 }
 
@@ -51,6 +56,12 @@ export interface JoinRequestPayload {
   playerName: string;
 }
 
+export interface ReconnectRequestPayload {
+  playerId: string;
+  reconnectToken?: string;
+  playerName?: string;
+}
+
 export interface ThreeStarConsentState {
   status: 'pending' | 'accepted' | 'declined';
   requiredPlayerIds: string[];
@@ -60,6 +71,7 @@ export interface ThreeStarConsentState {
 
 export interface JoinAcceptedPayload {
   myPlayerId: string;
+  reconnectToken?: string;
   roomCode: string;
   players: OnlinePlayer[];
   gameState?: GameState | null;
