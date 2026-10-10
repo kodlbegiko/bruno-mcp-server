@@ -6,6 +6,8 @@ import { CardLevel } from '../types/card';
 import { PlayerSetup } from '../components/setup/PlayerSetup';
 import { ModeSelector } from '../components/setup/ModeSelector';
 import { SessionLengthSelector } from '../components/setup/SessionLengthSelector';
+import { QuestionSetSelector } from '../components/setup/QuestionSetSelector';
+import { QuestionSetId } from '../domain/questions/questionSets';
 import { Button } from '../components/ui/Button';
 
 interface SetupProps {
@@ -21,6 +23,7 @@ export const Setup: React.FC<SetupProps> = ({ onBackToHome, onStartGame }) => {
     { id: 'p_2', name: '' },
   ]);
   const [mode, setMode] = useState<GameMode>('guided');
+  const [questionSetId, setQuestionSetId] = useState<QuestionSetId>('full');
   const [startingLevel, setStartingLevel] = useState<CardLevel>('icebreaker');
   const [sessionGoal, setSessionGoal] = useState<SessionGoalMinutes>(null);
 
@@ -31,7 +34,13 @@ export const Setup: React.FC<SetupProps> = ({ onBackToHome, onStartGame }) => {
       name: p.name.trim() || `玩家 ${idx + 1}`,
     }));
 
-    initGame(sanitizedPlayers, mode, sessionGoal, mode === 'free' ? startingLevel : 'icebreaker');
+    initGame(
+      sanitizedPlayers,
+      mode,
+      sessionGoal,
+      mode === 'free' ? startingLevel : 'icebreaker',
+      questionSetId
+    );
     onStartGame();
   };
 
@@ -70,7 +79,15 @@ export const Setup: React.FC<SetupProps> = ({ onBackToHome, onStartGame }) => {
           />
         </section>
 
-        {/* Section 3: Session Duration */}
+        {/* Section 3: Question Set */}
+        <section className="bg-paper-100/60 dark:bg-stone-800/60 p-4 rounded-2xl border border-paper-border dark:border-stone-700">
+          <QuestionSetSelector
+            questionSetId={questionSetId}
+            onChangeQuestionSetId={setQuestionSetId}
+          />
+        </section>
+
+        {/* Section 4: Session Duration */}
         <section className="bg-paper-100/60 dark:bg-stone-800/60 p-4 rounded-2xl border border-paper-border dark:border-stone-700">
           <SessionLengthSelector
             sessionGoal={sessionGoal}

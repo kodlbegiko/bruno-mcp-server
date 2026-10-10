@@ -96,7 +96,7 @@ export const App: React.FC = () => {
       { id: 'player_1', name: '玩家 1' },
       { id: 'player_2', name: '玩家 2' },
     ];
-    initGame(defaultPlayers, 'guided', null, 'icebreaker');
+    initGame(defaultPlayers, 'guided', null, 'icebreaker', 'full');
     setCurrentRoute('game');
   };
 
@@ -131,7 +131,8 @@ export const App: React.FC = () => {
       gamePlayers,
       hostGameMode,
       hostSessionGoal,
-      hostGameMode === 'free' ? hostStartingLevel : 'icebreaker'
+      hostGameMode === 'free' ? hostStartingLevel : 'icebreaker',
+      'full'
     );
 
     const isDirectThreeStar = hostGameMode === 'free' && hostStartingLevel === 'three-star';

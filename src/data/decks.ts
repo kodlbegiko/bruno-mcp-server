@@ -1,8 +1,6 @@
 import { Card, CardLevel } from '../types/card';
-import { icebreakerCards } from './cards/icebreaker';
-import { oneStarCards } from './cards/oneStar';
-import { twoStarCards } from './cards/twoStar';
-import { threeStarCards } from './cards/threeStar';
+import { originalCards, icebreakerCards, oneStarCards, twoStarCards, threeStarCards } from './cards/original';
+import { getCardById as getCardByIdFromRegistry, getAllCards } from './cards/registry';
 
 export const deckCards: Record<CardLevel, Card[]> = {
   icebreaker: icebreakerCards,
@@ -18,21 +16,14 @@ export const totalDeckCounts: Record<CardLevel, number> = {
   'three-star': 20,
 };
 
-export const allCards: Card[] = [
-  ...icebreakerCards,
-  ...oneStarCards,
-  ...twoStarCards,
-  ...threeStarCards,
-];
-
-const cardsMap = new Map<string, Card>(allCards.map((c) => [c.id, c]));
+export const allCards: Card[] = originalCards;
 
 export function getCardById(id: string): Card | undefined {
-  return cardsMap.get(id);
+  return getCardByIdFromRegistry(id);
 }
 
 /**
- * Development and test-time assertion verifying data integrity:
+ * Development and test-time assertion verifying original data integrity:
  * - Exactly 10 icebreaker cards
  * - Exactly 20 one-star cards
  * - Exactly 20 two-star cards
@@ -55,12 +46,12 @@ export function assertCardDatabase(): void {
   if (threeStarCards.length !== 20) {
     throw new Error(`Invalid three-star cards count: expected 20, got ${threeStarCards.length}`);
   }
-  if (allCards.length !== 70) {
-    throw new Error(`Invalid total cards count: expected 70, got ${allCards.length}`);
+  if (originalCards.length !== 70) {
+    throw new Error(`Invalid total cards count: expected 70, got ${originalCards.length}`);
   }
 
   const ids = new Set<string>();
-  for (const card of allCards) {
+  for (const card of getAllCards()) {
     if (ids.has(card.id)) {
       throw new Error(`Duplicate card ID detected: ${card.id}`);
     }

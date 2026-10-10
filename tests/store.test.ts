@@ -69,11 +69,11 @@ describe('Game Store & State Machine', () => {
   });
 
   it('handles deck exhaustion by setting currentCardId to null', () => {
-    const store = useGameStore.getState();
-    store.initGame(players, 'guided', null);
+    useGameStore.getState().initGame(players, 'guided', null);
 
-    // Exhaust icebreaker deck (10 cards)
-    for (let i = 0; i < 15; i++) {
+    const deckLength = useGameStore.getState().gameState?.decks.icebreaker.shuffledIds.length || 0;
+    // Exhaust icebreaker deck
+    for (let i = 0; i < deckLength + 1; i++) {
       useGameStore.getState().drawNextCard();
     }
 

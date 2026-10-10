@@ -1,5 +1,6 @@
 import { CardLevel } from './card';
 import { Player } from './player';
+import { QuestionSetId } from '../domain/questions/questionSets';
 
 export type GameMode = 'guided' | 'free';
 
@@ -16,6 +17,7 @@ export interface GameState {
   gameId: string;
   players: Player[];
   mode: GameMode;
+  questionSetId?: QuestionSetId;
   sessionGoalMinutes: SessionGoalMinutes;
   startedAt: number;
   currentLevel: CardLevel;

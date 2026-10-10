@@ -36,7 +36,7 @@ describe('Game State Semantics & Multiplayer Authority Suite', () => {
 
   describe('minPlayers Deck Filtering', () => {
     it('excludes ice-06 (minPlayers: 3) in 2-player games', () => {
-      useGameStore.getState().initGame(twoPlayers, 'guided', null);
+      useGameStore.getState().initGame(twoPlayers, 'guided', null, 'icebreaker', 'classic');
       const state = useGameStore.getState().gameState;
       expect(state).toBeDefined();
       expect(state?.decks.icebreaker.shuffledIds).not.toContain('ice-06');
@@ -44,7 +44,7 @@ describe('Game State Semantics & Multiplayer Authority Suite', () => {
     });
 
     it('includes ice-06 in 3-or-more player games', () => {
-      useGameStore.getState().initGame(threePlayers, 'guided', null);
+      useGameStore.getState().initGame(threePlayers, 'guided', null, 'icebreaker', 'classic');
       const state = useGameStore.getState().gameState;
       expect(state).toBeDefined();
       expect(state?.decks.icebreaker.shuffledIds).toContain('ice-06');

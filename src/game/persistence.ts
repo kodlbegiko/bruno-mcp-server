@@ -29,14 +29,29 @@ export function saveGameState(state: GameState): void {
   }
 }
 
+export function migrateGameState(raw: unknown): GameState | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+  const state = raw as Partial<GameState>;
+  if (typeof state.gameId !== 'string' || !Array.isArray(state.players)) {
+    return null;
+  }
+  return {
+    ...state,
+    /**
+     * 舊版遊戲預設一定是原版 70 題 (classic)
+     */
+    questionSetId: state.questionSetId ?? 'classic',
+  } as GameState;
+}
+
 export function loadGameState(): GameState | null {
   try {
     const raw = localStorage.getItem(GAME_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.gameId === 'string' && Array.isArray(parsed.players)) {
-      return parsed as GameState;
-    }
+    return migrateGameState(parsed);
   } catch (err) {
     console.error('Failed to parse saved game state:', err);
   }

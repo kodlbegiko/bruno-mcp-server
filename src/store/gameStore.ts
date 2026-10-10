@@ -2,10 +2,13 @@ import { create } from 'zustand';
 import { CardLevel } from '../types/card';
 import { Player } from '../types/player';
 import { GameMode, GameState, SessionGoalMinutes } from '../types/game';
-import { deckCards, getCardById } from '../data/decks';
+import { getCardById } from '../data/decks';
 import { createShuffledDeck } from '../game/shuffle';
 import { clearGameState, loadGameState, saveGameState } from '../game/persistence';
 import { resetSessionTimer } from '../utils/analytics';
+
+import { QuestionSetId } from '../domain/questions/questionSets';
+import { buildQuestionPool } from '../domain/questions/buildQuestionPool';
 
 interface GameStore {
   // State
@@ -22,7 +25,8 @@ interface GameStore {
     players: Player[],
     mode: GameMode,
     sessionGoalMinutes: SessionGoalMinutes,
-    startingLevel?: CardLevel
+    startingLevel?: CardLevel,
+    questionSetId?: QuestionSetId
   ) => void;
   resumeGame: () => boolean;
   flipCard: () => void;
@@ -38,15 +42,14 @@ interface GameStore {
   resetGame: () => void;
 }
 
-function initializeDecks(playerCount?: number): GameState['decks'] {
-  const filterByPlayerCount = (cards: { id: string; minPlayers?: number }[]) =>
-    playerCount ? cards.filter((c) => !c.minPlayers || playerCount >= c.minPlayers) : cards;
+function initializeDecks(questionSetId: QuestionSetId = 'full', playerCount: number = 2): GameState['decks'] {
+  const pool = buildQuestionPool({ questionSetId, playerCount });
 
   return {
-    icebreaker: createShuffledDeck(filterByPlayerCount(deckCards.icebreaker).map((c) => c.id)),
-    'one-star': createShuffledDeck(filterByPlayerCount(deckCards['one-star']).map((c) => c.id)),
-    'two-star': createShuffledDeck(filterByPlayerCount(deckCards['two-star']).map((c) => c.id)),
-    'three-star': createShuffledDeck(filterByPlayerCount(deckCards['three-star']).map((c) => c.id)),
+    icebreaker: createShuffledDeck(pool['icebreaker'].map((c) => c.id)),
+    'one-star': createShuffledDeck(pool['one-star'].map((c) => c.id)),
+    'two-star': createShuffledDeck(pool['two-star'].map((c) => c.id)),
+    'three-star': createShuffledDeck(pool['three-star'].map((c) => c.id)),
   };
 }
 
@@ -59,10 +62,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   showTimeReminder: false,
   selectedPlayerIds: [],
 
-  initGame: (players, mode, sessionGoalMinutes, startingLevel) => {
+  initGame: (players, mode, sessionGoalMinutes, startingLevel, questionSetId = 'full') => {
     resetSessionTimer();
     const playerCount = players.length;
-    const decks = initializeDecks(playerCount);
+    const decks = initializeDecks(questionSetId, playerCount);
     const startLevel: CardLevel = mode === 'free' && startingLevel ? startingLevel : 'icebreaker';
     const isThreeStarStart = startLevel === 'three-star';
     const deck = decks[startLevel];
@@ -81,6 +84,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         name: p.name.trim() || `玩家 ${idx + 1}`,
       })),
       mode,
+      questionSetId,
       sessionGoalMinutes,
       startedAt: Date.now(),
       currentLevel: startLevel,
