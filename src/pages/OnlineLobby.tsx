@@ -4,6 +4,8 @@ import { GameMode, SessionGoalMinutes } from '../types/game';
 import { CardLevel } from '../types/card';
 import { ModeSelector } from '../components/setup/ModeSelector';
 import { SessionLengthSelector } from '../components/setup/SessionLengthSelector';
+import { QuestionSetSelector } from '../components/setup/QuestionSetSelector';
+import { QuestionSetId } from '../domain/questions/questionSets';
 import { Button } from '../components/ui/Button';
 import { Camera } from 'lucide-react';
 
@@ -17,7 +19,8 @@ interface OnlineLobbyProps {
   onRoomReady: (
     mode: GameMode,
     sessionGoal: SessionGoalMinutes,
-    startingLevel?: CardLevel
+    startingLevel?: CardLevel,
+    questionSetId?: QuestionSetId
   ) => void;
 }
 
@@ -41,6 +44,7 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
   const [mode, setMode] = useState<GameMode>('guided');
   const [startingLevel, setStartingLevel] = useState<CardLevel>('icebreaker');
   const [sessionGoal, setSessionGoal] = useState<SessionGoalMinutes>(null);
+  const [questionSetId, setQuestionSetId] = useState<QuestionSetId>('full');
 
   // Guest options
   const [roomCodeInput, setRoomCodeInput] = useState(initialRoomCode || '');
@@ -61,7 +65,7 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
     clearError();
     try {
       await createRoom(hostName || '房主');
-      onRoomReady(mode, sessionGoal, mode === 'free' ? startingLevel : 'icebreaker');
+      onRoomReady(mode, sessionGoal, mode === 'free' ? startingLevel : 'icebreaker', questionSetId);
     } catch (err) {
       console.error(err);
     } finally {
@@ -173,6 +177,14 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
                 onChangeMode={setMode}
                 startingLevel={startingLevel}
                 onChangeStartingLevel={setStartingLevel}
+              />
+            </div>
+
+            {/* Question Set selection */}
+            <div className="bg-paper-100/60 dark:bg-stone-850 p-4 rounded-2xl border border-paper-border dark:border-stone-800">
+              <QuestionSetSelector
+                questionSetId={questionSetId}
+                onChangeQuestionSetId={setQuestionSetId}
               />
             </div>
 

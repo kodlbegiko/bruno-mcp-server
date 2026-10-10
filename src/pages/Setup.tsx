@@ -8,6 +8,10 @@ import { ModeSelector } from '../components/setup/ModeSelector';
 import { SessionLengthSelector } from '../components/setup/SessionLengthSelector';
 import { QuestionSetSelector } from '../components/setup/QuestionSetSelector';
 import { QuestionSetId } from '../domain/questions/questionSets';
+import {
+  RelationshipContextSelector,
+  RelationshipContextValue,
+} from '../components/setup/RelationshipContextSelector';
 import { Button } from '../components/ui/Button';
 
 interface SetupProps {
@@ -24,6 +28,7 @@ export const Setup: React.FC<SetupProps> = ({ onBackToHome, onStartGame }) => {
   ]);
   const [mode, setMode] = useState<GameMode>('guided');
   const [questionSetId, setQuestionSetId] = useState<QuestionSetId>('full');
+  const [relationshipContext, setRelationshipContext] = useState<RelationshipContextValue>('all');
   const [startingLevel, setStartingLevel] = useState<CardLevel>('icebreaker');
   const [sessionGoal, setSessionGoal] = useState<SessionGoalMinutes>(null);
 
@@ -39,7 +44,8 @@ export const Setup: React.FC<SetupProps> = ({ onBackToHome, onStartGame }) => {
       mode,
       sessionGoal,
       mode === 'free' ? startingLevel : 'icebreaker',
-      questionSetId
+      questionSetId,
+      relationshipContext !== 'all' ? relationshipContext : undefined
     );
     onStartGame();
   };
@@ -92,6 +98,14 @@ export const Setup: React.FC<SetupProps> = ({ onBackToHome, onStartGame }) => {
           <SessionLengthSelector
             sessionGoal={sessionGoal}
             onChangeSessionGoal={setSessionGoal}
+          />
+        </section>
+
+        {/* Section 5: Relationship Context */}
+        <section className="bg-paper-100/60 dark:bg-stone-800/60 p-4 rounded-2xl border border-paper-border dark:border-stone-700">
+          <RelationshipContextSelector
+            value={relationshipContext}
+            onChange={setRelationshipContext}
           />
         </section>
       </main>

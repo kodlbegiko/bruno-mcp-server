@@ -74,13 +74,16 @@ export type ResponderRule =
   | 'all'
   | 'everyoneExceptDrawer'
   | 'drawerChooses'
-  | 'selectedPlayers';
+  | 'selectedPlayers'
+  | 'selectedPlayer';
 
 export type TargetRule =
   | 'none'
   | 'drawer'
   | 'chosenPlayer'
   | 'all';
+
+export type ContentReviewStatus = 'draft' | 'content-reviewed' | 'approved';
 
 export interface ConversationCard {
   id: string;
@@ -111,6 +114,11 @@ export interface ConversationCard {
   sensitivity?: SensitivityTag[];
 
   followUp?: CardFollowUp;
+
+  /**
+   * 題目審核進度狀態
+   */
+  reviewStatus?: ContentReviewStatus;
 
   /**
    * 原版卡人工核對或 Expansion 審核狀態

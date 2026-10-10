@@ -8,6 +8,7 @@ import { LEVEL_NAMES, getNextLevel } from '../../game/progression';
 import { playSlideSound } from '../../utils/sound';
 import { triggerHaptic } from '../../utils/haptics';
 import { GameCard } from '../card/GameCard';
+import { CardFollowUpSection } from '../card/CardFollowUpSection';
 import { DrawerIndicator } from './DrawerIndicator';
 import { InteractionInstruction } from './InteractionInstruction';
 import { PlayerSelector } from './PlayerSelector';
@@ -346,6 +347,17 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                 onSwipeRight={handleNextCard}
                 onSwipeLeft={handleSkipCard}
               />
+
+              {/* Follow-up Question Expansion (Shown when flipped and card has follow-up) */}
+              {isCardFlipped && currentCard.followUp && (
+                <div className="mt-2.5 w-full flex justify-center">
+                  <CardFollowUpSection
+                    cardId={currentCard.id}
+                    level={currentCard.level}
+                    followUp={currentCard.followUp}
+                  />
+                </div>
+              )}
 
               {/* Interaction Details (Shown when flipped) */}
               {isCardFlipped && interactionInfo && (

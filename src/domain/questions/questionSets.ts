@@ -1,4 +1,4 @@
-import type { CardPackId } from '../../data/cards/types';
+import type { CardPackId, CardLevel } from '../../data/cards/types';
 
 export type QuestionSetId =
   | 'classic'
@@ -42,3 +42,37 @@ export const QUESTION_SETS: Record<QuestionSetId, QuestionSetDefinition> = {
     packIds: ['expansion-v1'],
   },
 };
+
+export function getQuestionSetLevelCounts(questionSetId: QuestionSetId = 'full'): Record<CardLevel, number> {
+  // Direct pack definitions to avoid circular dependencies
+  let icebreaker = 0;
+  let oneStar = 0;
+  let twoStar = 0;
+  let threeStar = 0;
+
+  const definition = QUESTION_SETS[questionSetId] || QUESTION_SETS.full;
+  if (definition.packIds.includes('original')) {
+    icebreaker += 10;
+    oneStar += 20;
+    twoStar += 20;
+    threeStar += 20;
+  }
+  if (definition.packIds.includes('expansion-v1')) {
+    icebreaker += 15;
+    oneStar += 15;
+    twoStar += 15;
+    threeStar += 15;
+  }
+
+  return {
+    icebreaker,
+    'one-star': oneStar,
+    'two-star': twoStar,
+    'three-star': threeStar,
+  };
+}
+
+export function getQuestionSetTotalCount(questionSetId: QuestionSetId = 'full'): number {
+  const counts = getQuestionSetLevelCounts(questionSetId);
+  return counts.icebreaker + counts['one-star'] + counts['two-star'] + counts['three-star'];
+}

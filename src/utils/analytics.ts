@@ -29,6 +29,7 @@ export type AnalyticsEventType =
   | 'three_star_prompt_shown'
   | 'three_star_accept'
   | 'three_star_decline'
+  | 'follow_up_opened'
   | 'closing_card_view'
   | 'game_end'
   | 'share'

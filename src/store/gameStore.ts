@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { CardLevel } from '../types/card';
+import { RelationshipTag } from '../data/cards/types';
 import { Player } from '../types/player';
 import { GameMode, GameState, SessionGoalMinutes } from '../types/game';
 import { getCardById } from '../data/decks';
-import { createShuffledDeck } from '../game/shuffle';
+import { createPacedDeck } from '../domain/conversation/conversationEngine';
 import { clearGameState, loadGameState, saveGameState } from '../game/persistence';
 import { resetSessionTimer } from '../utils/analytics';
 
@@ -26,7 +27,8 @@ interface GameStore {
     mode: GameMode,
     sessionGoalMinutes: SessionGoalMinutes,
     startingLevel?: CardLevel,
-    questionSetId?: QuestionSetId
+    questionSetId?: QuestionSetId,
+    targetRelationship?: RelationshipTag
   ) => void;
   resumeGame: () => boolean;
   flipCard: () => void;
@@ -42,14 +44,19 @@ interface GameStore {
   resetGame: () => void;
 }
 
-function initializeDecks(questionSetId: QuestionSetId = 'full', playerCount: number = 2): GameState['decks'] {
+function initializeDecks(
+  questionSetId: QuestionSetId = 'full',
+  playerCount: number = 2,
+  targetRelationship?: RelationshipTag
+): GameState['decks'] {
   const pool = buildQuestionPool({ questionSetId, playerCount });
+  const pacingOptions = targetRelationship ? { targetRelationship } : {};
 
   return {
-    icebreaker: createShuffledDeck(pool['icebreaker'].map((c) => c.id)),
-    'one-star': createShuffledDeck(pool['one-star'].map((c) => c.id)),
-    'two-star': createShuffledDeck(pool['two-star'].map((c) => c.id)),
-    'three-star': createShuffledDeck(pool['three-star'].map((c) => c.id)),
+    icebreaker: createPacedDeck(pool['icebreaker'], pacingOptions),
+    'one-star': createPacedDeck(pool['one-star'], pacingOptions),
+    'two-star': createPacedDeck(pool['two-star'], pacingOptions),
+    'three-star': createPacedDeck(pool['three-star'], pacingOptions),
   };
 }
 
@@ -62,10 +69,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   showTimeReminder: false,
   selectedPlayerIds: [],
 
-  initGame: (players, mode, sessionGoalMinutes, startingLevel, questionSetId = 'full') => {
+  initGame: (players, mode, sessionGoalMinutes, startingLevel, questionSetId = 'full', targetRelationship) => {
     resetSessionTimer();
     const playerCount = players.length;
-    const decks = initializeDecks(questionSetId, playerCount);
+    const decks = initializeDecks(questionSetId, playerCount, targetRelationship);
     const startLevel: CardLevel = mode === 'free' && startingLevel ? startingLevel : 'icebreaker';
     const isThreeStarStart = startLevel === 'three-star';
     const deck = decks[startLevel];

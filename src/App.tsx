@@ -4,6 +4,7 @@ import { useGameStore } from './store/gameStore';
 import { useMultiplayerStore } from './store/multiplayerStore';
 import { GameMode, SessionGoalMinutes } from './types/game';
 import { CardLevel } from './types/card';
+import { QuestionSetId } from './domain/questions/questionSets';
 import { Home } from './pages/Home';
 import { Setup } from './pages/Setup';
 import { OfflineBanner } from './components/ui/OfflineBanner';
@@ -56,6 +57,7 @@ export const App: React.FC = () => {
   const [hostGameMode, setHostGameMode] = useState<GameMode>('guided');
   const [hostStartingLevel, setHostStartingLevel] = useState<CardLevel>('icebreaker');
   const [hostSessionGoal, setHostSessionGoal] = useState<SessionGoalMinutes>(null);
+  const [hostQuestionSetId, setHostQuestionSetId] = useState<QuestionSetId>('full');
 
   // Check URL query for direct room invite (?room=ABC123)
   useEffect(() => {
@@ -111,11 +113,13 @@ export const App: React.FC = () => {
   const handleRoomReady = (
     mode: GameMode,
     sessionGoal: SessionGoalMinutes,
-    startingLevel?: CardLevel
+    startingLevel?: CardLevel,
+    questionSetId: QuestionSetId = 'full'
   ) => {
     setHostGameMode(mode);
     setHostSessionGoal(sessionGoal);
     if (startingLevel) setHostStartingLevel(startingLevel);
+    setHostQuestionSetId(questionSetId);
     setCurrentRoute('online-waiting');
   };
 
@@ -132,7 +136,7 @@ export const App: React.FC = () => {
       hostGameMode,
       hostSessionGoal,
       hostGameMode === 'free' ? hostStartingLevel : 'icebreaker',
-      'full'
+      hostQuestionSetId
     );
 
     const isDirectThreeStar = hostGameMode === 'free' && hostStartingLevel === 'three-star';
@@ -209,6 +213,7 @@ export const App: React.FC = () => {
       {currentRoute === 'online-waiting' && (
         <Suspense fallback={<RouteLoadingFallback />}>
           <WaitingRoom
+            questionSetId={hostQuestionSetId}
             onStartGame={handleHostStartOnlineGame}
             onLeaveRoom={handleLeaveOnlineRoom}
           />

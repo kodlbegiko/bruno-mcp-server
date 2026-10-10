@@ -41,6 +41,20 @@ export function resolveInteraction(
     case 'chooseOne': {
       const needsSelection = selectedPlayers.length === 0;
       const target = selectedPlayers[0];
+
+      if (card.responderRule === 'selectedPlayer' || card.responderRule === 'selectedPlayers') {
+        return {
+          drawer,
+          responders: target ? [target] : [],
+          targets: [],
+          needsPlayerSelection: needsSelection,
+          selectionCount: 1,
+          instruction: target
+            ? `${target.name} 回答`
+            : `${drawer.name} 選一位玩家回答`,
+        };
+      }
+
       return {
         drawer,
         responders: [drawer],

@@ -268,7 +268,7 @@ export const Home: React.FC<HomeProps> = ({
 
         <div className="pt-2 text-center">
           <p className="text-[11px] text-ink-500 dark:text-stone-400 font-sans tracking-wide">
-            70 張對話卡牌 · 不記錄對話 · 無需登入 · 專注於彼此
+            130 道深度對話 · 原版 70 題＋全新擴充 60 題 · 不記錄對話 · 專注於彼此
           </p>
         </div>
       </footer>

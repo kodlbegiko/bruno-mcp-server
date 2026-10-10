@@ -7,5 +7,6 @@ export function expansionCard(card: ExpansionCardInput): ConversationCard {
     ...card,
     packId: 'expansion-v1',
     needsReview: false,
+    reviewStatus: 'approved',
   };
 }

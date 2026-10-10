@@ -20,6 +20,10 @@ const CLOSING_PROMPTS = [
     zh: '用一句話，謝謝今晚願意坦誠分享的彼此。',
     en: 'In one sentence, thank each other for being open and present.',
   },
+  {
+    zh: '安靜想十秒，再輪流說一句最想從這場對話帶走的話。',
+    en: 'Take ten quiet seconds, then share one reflection you want to carry with you from this conversation.',
+  },
 ];
 
 interface EndingProps {

@@ -13,14 +13,15 @@ export const CardFront: React.FC<CardFrontProps> = ({ card, className = '' }) =>
   const stageInfo = LEVEL_NAMES[card.level];
 
   const renderStars = () => {
-    switch (card.stars) {
-      case 0:
+    const level = card.level;
+    switch (level) {
+      case 'icebreaker':
         return <span className="text-xl tracking-wider text-icebreaker font-bold">☆</span>;
-      case 1:
+      case 'one-star':
         return <span className="text-xl tracking-wider text-oneStar-dark dark:text-lime-400 font-bold">★</span>;
-      case 2:
+      case 'two-star':
         return <span className="text-xl tracking-wider text-twoStar-dark dark:text-orange-400 font-bold">★★</span>;
-      case 3:
+      case 'three-star':
         return <span className="text-xl tracking-wider text-threeStar-dark dark:text-pink-400 font-bold">★★★</span>;
       default:
         return null;

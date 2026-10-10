@@ -2,7 +2,8 @@ import React from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { LEVEL_ORDER, LEVEL_NAMES } from '../../game/progression';
-import { totalDeckCounts } from '../../data/decks';
+import { useGameStore } from '../../store/gameStore';
+import { getQuestionSetLevelCounts, getQuestionSetTotalCount } from '../../domain/questions/questionSets';
 
 interface RulesModalProps {
   isOpen: boolean;
@@ -10,6 +11,10 @@ interface RulesModalProps {
 }
 
 export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
+  const currentSetId = useGameStore((s) => s.gameState?.questionSetId) || 'full';
+  const levelCounts = getQuestionSetLevelCounts(currentSetId);
+  const totalCount = getQuestionSetTotalCount(currentSetId);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="遊戲說明與核心理念">
       <div className="space-y-5 text-sm text-ink-800 dark:text-stone-200 font-serif leading-relaxed max-h-[70vh] overflow-y-auto pr-1">
@@ -26,12 +31,12 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
         {/* 4 Levels */}
         <section className="space-y-3">
           <h4 className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-stone-400">
-            四個對話深度 (共 70 張)
+            四個對話深度 (共 {totalCount} 張)
           </h4>
           <div className="space-y-2.5">
             {LEVEL_ORDER.map((lvl) => {
               const info = LEVEL_NAMES[lvl];
-              const count = totalDeckCounts[lvl];
+              const count = levelCounts[lvl];
               return (
                 <div
                   key={lvl}

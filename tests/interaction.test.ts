@@ -92,6 +92,31 @@ describe('Interaction Resolution Engine', () => {
     expect(resAfter.instruction).toBe('Amy 與 Sean 互動');
   });
 
+  it('correctly resolves "chooseOne" with responderRule: "selectedPlayer"', () => {
+    const card: Card = {
+      id: 'exp1-one-11',
+      level: 'one-star',
+      zh: '選一個人回答：你在哪件事情上比別人想像中更固執？',
+      interaction: 'chooseOne',
+      responderRule: 'selectedPlayer',
+      targetRule: 'none',
+    };
+
+    // Before selection
+    const resBefore = resolveInteraction(card, drawer, players, []);
+    expect(resBefore.needsPlayerSelection).toBe(true);
+    expect(resBefore.selectionCount).toBe(1);
+    expect(resBefore.responders).toEqual([]);
+    expect(resBefore.instruction).toBe('Amy 選一位玩家回答');
+
+    // After selection (Amy selects John, p3)
+    const resAfter = resolveInteraction(card, drawer, players, ['p3']);
+    expect(resAfter.needsPlayerSelection).toBe(false);
+    expect(resAfter.responders.map((p) => p.name)).toEqual(['John']);
+    expect(resAfter.targets).toEqual([]);
+    expect(resAfter.instruction).toBe('John 回答');
+  });
+
   it('correctly resolves "pair" interaction', () => {
     const card: Card = {
       id: 'mock-pair',

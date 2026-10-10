@@ -180,6 +180,8 @@ export const expansionTwoStarCards = [
     id: 'exp1-two-11',
     level: 'two-star',
     interaction: 'chooseOne',
+    responderRule: 'selectedPlayer',
+    targetRule: 'none',
     zh: '選一個人回答：什麼會讓你覺得「這裡是安全的，我可以說真話」？',
     en: 'Choose someone to answer: what makes you feel safe enough to be honest?',
     topic: 'trust',
