@@ -121,6 +121,13 @@ export function executeHostAction(
       }
       break;
     }
+    case 'OPEN_FOLLOW_UP':
+    case 'TOGGLE_FOLLOW_UP': {
+      if (actionPayload.cardId) {
+        game.recordFollowUpOpened(actionPayload.cardId);
+      }
+      break;
+    }
     case 'END_GAME':
       game.endGame();
       break;

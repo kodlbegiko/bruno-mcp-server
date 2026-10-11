@@ -1,4 +1,5 @@
 import type { ConversationCard, RelationshipTag } from '../../data/cards/types';
+import { getCardById } from '../../data/cards/registry';
 
 export interface ConversationPacingOptions {
   targetRelationship?: RelationshipTag;
@@ -113,8 +114,18 @@ export function paceDeckCards(
   });
 
   const firstCardPool = starterCandidates.length > 0 ? starterCandidates : remaining;
-  const firstIndex = Math.floor(Math.random() * firstCardPool.length);
-  const firstCard = firstCardPool[firstIndex];
+  let bestStarterScore = -Infinity;
+  let bestStarterIndex = 0;
+
+  for (let i = 0; i < firstCardPool.length; i++) {
+    const score = scoreCandidate(firstCardPool[i], [], options);
+    if (score > bestStarterScore) {
+      bestStarterScore = score;
+      bestStarterIndex = i;
+    }
+  }
+
+  const firstCard = firstCardPool[bestStarterIndex];
 
   ordered.push(firstCard);
   const remainingIndex = remaining.findIndex((c) => c.id === firstCard.id);
@@ -158,4 +169,123 @@ export function createPacedDeck(
     cursor: 0,
     usedIds: [],
   };
+}
+
+export interface AdaptiveSelectionContext {
+  historyCardIds?: string[];
+  justSkippedCardId?: string;
+  skippedCardIds?: string[];
+  followUpOpenedCardIds?: string[];
+  targetRelationship?: RelationshipTag;
+  randomJitter?: number;
+  windowSize?: number;
+}
+
+/**
+ * Computes adaptive score for candidate card based on real conversation signals
+ * (skips, follow-ups opened, relationship context, anti-clumping).
+ */
+export function scoreCandidateAdaptive(
+  candidate: ConversationCard,
+  context: AdaptiveSelectionContext = {}
+): number {
+  const historyCards: ConversationCard[] = (context.historyCardIds || [])
+    .map((id) => getCardById(id))
+    .filter((c): c is ConversationCard => !!c);
+
+  // 1. Base pacing score from conversation history (without jitter yet)
+  let score = scoreCandidate(candidate, historyCards, {
+    targetRelationship: context.targetRelationship,
+    randomJitter: 0,
+  });
+
+  // 2. Skip Signal (Negative Feedback / Psychological Safety Back-off)
+  if (context.justSkippedCardId) {
+    const skippedCard = getCardById(context.justSkippedCardId);
+    if (skippedCard) {
+      // Same topic penalty: player didn't want to discuss this topic right now
+      if (candidate.topic && skippedCard.topic && candidate.topic === skippedCard.topic) {
+        score -= 40;
+      }
+
+      // Shared sensitivity tag penalty: player retreated from this sensitive theme
+      if (candidate.sensitivity && skippedCard.sensitivity) {
+        const hasSharedSensitivity = candidate.sensitivity.some((tag) =>
+          skippedCard.sensitivity?.includes(tag)
+        );
+        if (hasSharedSensitivity) {
+          score -= 50;
+        }
+      }
+
+      // High intensity penalty after skip: back off to gentler questions
+      if ((candidate.intensity || 2) >= 4) {
+        score -= 35;
+      } else if ((candidate.intensity || 2) <= 2) {
+        score += 20;
+      }
+    }
+  }
+
+  // 3. Follow-Up Signal (Positive Feedback / Emotional Deepening Willingness)
+  const lastHistoryCardId =
+    context.historyCardIds && context.historyCardIds.length > 0
+      ? context.historyCardIds[context.historyCardIds.length - 1]
+      : null;
+
+  const didOpenFollowUpOnLastCard =
+    Boolean(lastHistoryCardId &&
+    context.followUpOpenedCardIds &&
+    context.followUpOpenedCardIds.includes(lastHistoryCardId));
+
+  if (didOpenFollowUpOnLastCard) {
+    const candidateIntensity = candidate.intensity || 2;
+    // Players are engaged and invested in deep connection
+    if (candidateIntensity >= 3) {
+      score += 20;
+    } else if (candidateIntensity <= 1) {
+      // Don't suddenly collapse to superficial trivia
+      score -= 15;
+    }
+  }
+
+  // 4. Random Jitter
+  const jitterFactor = context.randomJitter !== undefined ? context.randomJitter : 25;
+  if (jitterFactor > 0) {
+    score += Math.random() * jitterFactor;
+  }
+
+  return score;
+}
+
+/**
+ * Dynamically selects the next best adaptive card from remaining candidates in deck
+ * using a windowed evaluation pool to balance optimal conversational arc with organic surprise.
+ */
+export function selectNextAdaptiveCard(
+  candidateIds: string[],
+  context: AdaptiveSelectionContext = {}
+): string | null {
+  if (candidateIds.length === 0) return null;
+  if (candidateIds.length === 1) return candidateIds[0];
+
+  // Window sampling (e.g. 8-12 cards) prevents exhaustive rigidity while strongly favoring best fit
+  const windowSize = Math.max(3, Math.min(candidateIds.length, context.windowSize || 10));
+  const pool = candidateIds.slice(0, windowSize);
+
+  let bestScore = -Infinity;
+  let bestCardId = pool[0];
+
+  for (const cardId of pool) {
+    const card = getCardById(cardId);
+    if (!card) continue;
+
+    const score = scoreCandidateAdaptive(card, context);
+    if (score > bestScore) {
+      bestScore = score;
+      bestCardId = cardId;
+    }
+  }
+
+  return bestCardId;
 }

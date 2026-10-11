@@ -4,7 +4,7 @@ import { RelationshipTag } from '../data/cards/types';
 import { Player } from '../types/player';
 import { GameMode, GameState, SessionGoalMinutes } from '../types/game';
 import { getCardById } from '../data/decks';
-import { createPacedDeck } from '../domain/conversation/conversationEngine';
+import { createPacedDeck, selectNextAdaptiveCard } from '../domain/conversation/conversationEngine';
 import { clearGameState, loadGameState, saveGameState } from '../game/persistence';
 import { resetSessionTimer } from '../utils/analytics';
 
@@ -37,6 +37,7 @@ interface GameStore {
   changeLevel: (level: CardLevel) => void;
   confirmThreeStarConsent: () => void;
   cancelThreeStarConsent: () => void;
+  recordFollowUpOpened: (cardId: string) => void;
   selectPlayer: (playerId: string) => void;
   clearSelection: () => void;
   dismissTimeReminder: () => void;
@@ -92,6 +93,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       })),
       mode,
       questionSetId,
+      targetRelationship,
       sessionGoalMinutes,
       startedAt: Date.now(),
       currentLevel: startLevel,
@@ -114,6 +116,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       cardsDrawnCount: initialCardId ? 1 : 0,
       historyCardIds: [],
       revealedCardIds: [],
+      skippedCardIds: [],
+      followUpOpenedCardIds: [],
       status: 'playing',
     };
 
@@ -179,9 +183,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const currentLevel = state.currentLevel;
     const deck = state.decks[currentLevel];
     const nextCursor = deck.cursor;
-    const hasMoreInDeck = nextCursor < deck.shuffledIds.length;
+    const remainingIds = deck.shuffledIds.slice(nextCursor);
 
-    if (!hasMoreInDeck) {
+    if (remainingIds.length === 0) {
       // Current deck is empty
       const updatedState: GameState = {
         ...state,
@@ -196,21 +200,37 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return;
     }
 
-    const nextCardId = deck.shuffledIds[nextCursor];
+    const adaptiveCardId =
+      selectNextAdaptiveCard(remainingIds, {
+        historyCardIds: state.historyCardIds,
+        skippedCardIds: state.skippedCardIds,
+        followUpOpenedCardIds: state.followUpOpenedCardIds,
+        targetRelationship: state.targetRelationship,
+      }) || remainingIds[0];
+
+    // Reorder deck.shuffledIds: swap chosen adaptive card to position nextCursor
+    const chosenIndexInShuffled = deck.shuffledIds.indexOf(adaptiveCardId, nextCursor);
+    const updatedShuffledIds = [...deck.shuffledIds];
+    if (chosenIndexInShuffled > nextCursor) {
+      const temp = updatedShuffledIds[nextCursor];
+      updatedShuffledIds[nextCursor] = updatedShuffledIds[chosenIndexInShuffled];
+      updatedShuffledIds[chosenIndexInShuffled] = temp;
+    }
+
     const nextDrawerIndex = (state.drawerIndex + 1) % state.players.length;
 
     const updatedState: GameState = {
       ...state,
       drawerIndex: nextDrawerIndex,
-      currentCardId: nextCardId,
+      currentCardId: adaptiveCardId,
       currentSelection: { selectedPlayerIds: [] },
       cardsDrawnCount: state.cardsDrawnCount + 1,
       decks: {
         ...state.decks,
         [currentLevel]: {
-          ...deck,
+          shuffledIds: updatedShuffledIds,
           cursor: nextCursor + 1,
-          usedIds: [...deck.usedIds, nextCardId],
+          usedIds: [...deck.usedIds, adaptiveCardId],
         },
       },
     };
@@ -230,9 +250,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const currentLevel = state.currentLevel;
     const deck = state.decks[currentLevel];
     const nextCursor = deck.cursor;
-    const hasMoreInDeck = nextCursor < deck.shuffledIds.length;
+    const remainingIds = deck.shuffledIds.slice(nextCursor);
 
-    if (!hasMoreInDeck) {
+    if (remainingIds.length === 0) {
       // Deck is empty
       const updatedState: GameState = {
         ...state,
@@ -247,20 +267,43 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return;
     }
 
-    const nextCardId = deck.shuffledIds[nextCursor];
+    const skippedCardId = state.currentCardId;
+    const updatedSkipped = skippedCardId
+      ? [...(state.skippedCardIds || []), skippedCardId]
+      : state.skippedCardIds || [];
+
+    const adaptiveCardId =
+      selectNextAdaptiveCard(remainingIds, {
+        historyCardIds: state.historyCardIds,
+        justSkippedCardId: skippedCardId || undefined,
+        skippedCardIds: updatedSkipped,
+        followUpOpenedCardIds: state.followUpOpenedCardIds,
+        targetRelationship: state.targetRelationship,
+      }) || remainingIds[0];
+
+    // Reorder deck.shuffledIds: swap chosen card to position nextCursor
+    const chosenIndexInShuffled = deck.shuffledIds.indexOf(adaptiveCardId, nextCursor);
+    const updatedShuffledIds = [...deck.shuffledIds];
+    if (chosenIndexInShuffled > nextCursor) {
+      const temp = updatedShuffledIds[nextCursor];
+      updatedShuffledIds[nextCursor] = updatedShuffledIds[chosenIndexInShuffled];
+      updatedShuffledIds[chosenIndexInShuffled] = temp;
+    }
+
     // Keep drawerIndex unchanged: the same player draws the replacement card!
     const updatedState: GameState = {
       ...state,
       // drawerIndex remains unchanged
-      currentCardId: nextCardId,
+      currentCardId: adaptiveCardId,
       currentSelection: { selectedPlayerIds: [] },
       cardsDrawnCount: state.cardsDrawnCount + 1,
+      skippedCardIds: updatedSkipped,
       decks: {
         ...state.decks,
         [currentLevel]: {
-          ...deck,
+          shuffledIds: updatedShuffledIds,
           cursor: nextCursor + 1,
-          usedIds: [...deck.usedIds, nextCardId],
+          usedIds: [...deck.usedIds, adaptiveCardId],
         },
       },
     };
@@ -290,19 +333,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
     let nextCardId: string | null = null;
     let nextCursor = deck.cursor;
     let newUsedIds = [...deck.usedIds];
+    let updatedShuffledIds = [...deck.shuffledIds];
 
-    if (deck.cursor === 0 && deck.shuffledIds.length > 0) {
-      // Fresh deck
-      nextCardId = deck.shuffledIds[0];
-      nextCursor = 1;
-      newUsedIds = [nextCardId];
-    } else if (deck.cursor < deck.shuffledIds.length) {
-      // Deck in progress: draw next unplayed card
-      nextCardId = deck.shuffledIds[deck.cursor];
+    const remainingIds = deck.shuffledIds.slice(deck.cursor);
+    if (remainingIds.length > 0) {
+      nextCardId =
+        selectNextAdaptiveCard(remainingIds, {
+          historyCardIds: state.historyCardIds,
+          skippedCardIds: state.skippedCardIds,
+          followUpOpenedCardIds: state.followUpOpenedCardIds,
+          targetRelationship: state.targetRelationship,
+        }) || remainingIds[0];
+
+      const chosenIndex = deck.shuffledIds.indexOf(nextCardId, deck.cursor);
+      if (chosenIndex > deck.cursor) {
+        const temp = updatedShuffledIds[deck.cursor];
+        updatedShuffledIds[deck.cursor] = updatedShuffledIds[chosenIndex];
+        updatedShuffledIds[chosenIndex] = temp;
+      }
+
       nextCursor = deck.cursor + 1;
       newUsedIds = [...deck.usedIds, nextCardId];
     } else {
-      // Deck is already exhausted
       nextCardId = null;
     }
 
@@ -321,7 +373,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       decks: {
         ...state.decks,
         [level]: {
-          ...deck,
+          shuffledIds: updatedShuffledIds,
           cursor: nextCursor,
           usedIds: newUsedIds,
         },
@@ -336,6 +388,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
       pendingStage: null,
       selectedPlayerIds: [],
     });
+  },
+
+  recordFollowUpOpened: (cardId: string) => {
+    const state = get().gameState;
+    if (!state) return;
+    const current = state.followUpOpenedCardIds || [];
+    if (current.includes(cardId)) return;
+    const updatedState: GameState = {
+      ...state,
+      followUpOpenedCardIds: [...current, cardId],
+    };
+    saveGameState(updatedState);
+    set({ gameState: updatedState });
   },
 
   confirmThreeStarConsent: () => {

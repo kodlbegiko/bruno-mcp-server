@@ -3,6 +3,7 @@ import { expansionCard as c } from './helpers';
 export const expansionIcebreakerCards = [
   c({
     id: 'exp1-ice-01',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'single',
     zh: '最近有什麼很小的事情，卻讓你心情很好？',
@@ -21,6 +22,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-02',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'all',
     zh: '每個人分享一個自己其實很擅長、但幾乎派不上用場的技能。',
@@ -39,6 +41,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-03',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'pair',
     zh: '選一個人。你們各自分享最近正在著迷的一件事。',
@@ -58,6 +61,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-04',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'discussion',
     zh: '如果明天突然多出完整一天的假，你們最想怎麼過？',
@@ -76,6 +80,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-05',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'all',
     zh: '用一個表情符號形容你今天的狀態，然後說說為什麼。',
@@ -94,6 +99,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-06',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'single',
     zh: '有沒有一道食物，只要吃到就會讓你想到某個地方或某個人？',
@@ -111,6 +117,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-07',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'chooseOne',
     zh: '選一個人，猜猜看他最理想的週末會怎麼過，再讓他公布答案。',
@@ -130,6 +137,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-08',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'pair',
     zh: '選一個人，用 30 秒找出你們三個共同點。',
@@ -149,6 +157,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-09',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'discussion',
     zh: '你們覺得「會聊天的人」最重要的特質是什麼？',
@@ -167,6 +176,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-10',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'action',
     zh: '環顧四周，每個人挑一樣東西，說說它讓你想到什麼。',
@@ -185,6 +195,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-11',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'single',
     zh: '最近有什麼東西是你一聊起來就很容易停不下來的？',
@@ -203,6 +214,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-12',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'all',
     zh: '每個人分享一個自己每天幾乎一定會做的小習慣。',
@@ -221,6 +233,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-13',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'single',
     zh: '如果現在可以瞬間出現在任何地方，你會去哪裡？',
@@ -239,6 +252,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-14',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'all',
     zh: '每個人分享一句曾經收到、而且到現在還記得的稱讚。',
@@ -257,6 +271,7 @@ export const expansionIcebreakerCards = [
   }),
   c({
     id: 'exp1-ice-15',
+    reviewStatus: 'approved',
     level: 'icebreaker',
     interaction: 'single',
     zh: '最近有什麼微小的新發現，或是讓你感到意外驚喜的人事物？',

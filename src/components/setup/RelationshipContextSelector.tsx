@@ -22,10 +22,22 @@ const CONTEXT_OPTIONS: Array<{
     descZh: '通用題庫推薦，適配所有情境',
   },
   {
+    value: 'new-friends',
+    labelZh: '初識／新朋友',
+    emoji: '👋',
+    descZh: '輕鬆破冰、日常性格，避免初期尷尬與過度壓力',
+  },
+  {
     value: 'friends',
     labelZh: '朋友／同儕',
     emoji: '☕',
     descZh: '著重日常、價值觀與趣味共鳴',
+  },
+  {
+    value: 'group',
+    labelZh: '多人聚會',
+    emoji: '🎉',
+    descZh: '著重全場參與、趣味互動與群體共鳴',
   },
   {
     value: 'dating',

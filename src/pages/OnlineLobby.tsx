@@ -2,9 +2,11 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useMultiplayerStore } from '../store/multiplayerStore';
 import { GameMode, SessionGoalMinutes } from '../types/game';
 import { CardLevel } from '../types/card';
+import { RelationshipTag } from '../data/cards/types';
 import { ModeSelector } from '../components/setup/ModeSelector';
 import { SessionLengthSelector } from '../components/setup/SessionLengthSelector';
 import { QuestionSetSelector } from '../components/setup/QuestionSetSelector';
+import { RelationshipContextSelector, RelationshipContextValue } from '../components/setup/RelationshipContextSelector';
 import { QuestionSetId } from '../domain/questions/questionSets';
 import { Button } from '../components/ui/Button';
 import { Camera } from 'lucide-react';
@@ -20,7 +22,8 @@ interface OnlineLobbyProps {
     mode: GameMode,
     sessionGoal: SessionGoalMinutes,
     startingLevel?: CardLevel,
-    questionSetId?: QuestionSetId
+    questionSetId?: QuestionSetId,
+    targetRelationship?: RelationshipTag
   ) => void;
 }
 
@@ -45,6 +48,7 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
   const [startingLevel, setStartingLevel] = useState<CardLevel>('icebreaker');
   const [sessionGoal, setSessionGoal] = useState<SessionGoalMinutes>(null);
   const [questionSetId, setQuestionSetId] = useState<QuestionSetId>('full');
+  const [relationshipContext, setRelationshipContext] = useState<RelationshipContextValue>('all');
 
   // Guest options
   const [roomCodeInput, setRoomCodeInput] = useState(initialRoomCode || '');
@@ -65,7 +69,14 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
     clearError();
     try {
       await createRoom(hostName || '房主');
-      onRoomReady(mode, sessionGoal, mode === 'free' ? startingLevel : 'icebreaker', questionSetId);
+      const selectedTag = relationshipContext === 'all' ? undefined : relationshipContext;
+      onRoomReady(
+        mode,
+        sessionGoal,
+        mode === 'free' ? startingLevel : 'icebreaker',
+        questionSetId,
+        selectedTag
+      );
     } catch (err) {
       console.error(err);
     } finally {
@@ -185,6 +196,14 @@ export const OnlineLobby: React.FC<OnlineLobbyProps> = ({
               <QuestionSetSelector
                 questionSetId={questionSetId}
                 onChangeQuestionSetId={setQuestionSetId}
+              />
+            </div>
+
+            {/* Relationship Context selection */}
+            <div className="bg-paper-100/60 dark:bg-stone-850 p-4 rounded-2xl border border-paper-border dark:border-stone-800">
+              <RelationshipContextSelector
+                value={relationshipContext}
+                onChange={setRelationshipContext}
               />
             </div>
 

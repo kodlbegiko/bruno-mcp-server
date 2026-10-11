@@ -36,6 +36,8 @@ export type ClientActionType =
   | 'CONFIRM_THREE_STAR'
   | 'CANCEL_THREE_STAR'
   | 'SELECT_PLAYER'
+  | 'OPEN_FOLLOW_UP'
+  | 'TOGGLE_FOLLOW_UP'
   | 'END_GAME'
   | 'RESET_GAME';
 
@@ -44,6 +46,7 @@ export interface ClientActionPayload {
   level?: CardLevel;
   targetPlayerId?: string;
   playerId?: string;
+  cardId?: string;
 }
 
 export interface PeerMessage {

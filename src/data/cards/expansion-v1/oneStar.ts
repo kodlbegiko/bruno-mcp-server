@@ -3,6 +3,7 @@ import { expansionCard as c } from './helpers';
 export const expansionOneStarCards = [
   c({
     id: 'exp1-one-01',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'single',
     zh: '別人第一次認識你時，最容易對你有什麼錯誤印象？',
@@ -20,6 +21,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-02',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'single',
     zh: '你身上有哪個小習慣，很能代表真正的你？',
@@ -37,6 +39,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-03',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'pair',
     zh: '選一個人。各自說一個你們很不一樣、但你覺得這種差異其實很有趣的地方。',
@@ -55,6 +58,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-04',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'othersToDrawer',
     zh: '其他人各自說一個你們目前在抽卡者身上注意到的特質。',
@@ -74,6 +78,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-05',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'single',
     zh: '最近有哪一件很小的事情，讓你其實有點為自己感到驕傲？',
@@ -91,6 +96,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-06',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'discussion',
     zh: '你們覺得「有趣的人」和「讓人舒服的人」，哪一種比較難得？',
@@ -109,6 +115,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-07',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'single',
     zh: '你通常是很快做決定的人，還是會想很久？為什麼？',
@@ -126,6 +133,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-08',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'pair',
     zh: '選一個人。隨著認識加深，你對他哪一個特質有了截然不同的理解或欣賞？',
@@ -143,6 +151,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-09',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'all',
     zh: '每個人分享一件通常要認識你一段時間，別人才會發現的事情。',
@@ -161,6 +170,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-10',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'discussion',
     zh: '你們覺得自己的「社交電量」通常是怎麼被充滿，又是怎麼被耗光的？',
@@ -179,6 +189,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-11',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'chooseOne',
     responderRule: 'selectedPlayer',
@@ -199,6 +210,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-12',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'single',
     zh: '最近有什麼事情讓你改變了原本的看法？',
@@ -215,6 +227,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-13',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'othersToDrawer',
     zh: '其他人猜猜看：抽卡者最理想的一天可能會長什麼樣子？最後由抽卡者公布答案。',
@@ -234,6 +247,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-14',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'pair',
     zh: '選一個人。各自說一件如果有機會，你很樂意教對方的事情。',
@@ -252,6 +266,7 @@ export const expansionOneStarCards = [
   }),
   c({
     id: 'exp1-one-15',
+    reviewStatus: 'approved',
     level: 'one-star',
     interaction: 'single',
     zh: '你在什麼樣的環境裡，最容易感覺自己很像自己？',

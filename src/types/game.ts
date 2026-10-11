@@ -1,4 +1,5 @@
 import { CardLevel } from './card';
+import { RelationshipTag } from '../data/cards/types';
 import { Player } from './player';
 import { QuestionSetId } from '../domain/questions/questionSets';
 
@@ -18,6 +19,7 @@ export interface GameState {
   players: Player[];
   mode: GameMode;
   questionSetId?: QuestionSetId;
+  targetRelationship?: RelationshipTag;
   sessionGoalMinutes: SessionGoalMinutes;
   startedAt: number;
   currentLevel: CardLevel;
@@ -36,6 +38,8 @@ export interface GameState {
   cardsDrawnCount: number;
   historyCardIds?: string[];
   revealedCardIds?: string[];
+  skippedCardIds?: string[];
+  followUpOpenedCardIds?: string[];
   status: 'playing' | 'ended';
   endedAt?: number;
 }

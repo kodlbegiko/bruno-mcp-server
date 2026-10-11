@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CardFollowUp, CardLevel } from '../../data/cards/types';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useGameStore } from '../../store/gameStore';
+import { useMultiplayerStore } from '../../store/multiplayerStore';
 import { trackEvent } from '../../utils/analytics';
 
 interface CardFollowUpSectionProps {
@@ -17,19 +19,33 @@ export const CardFollowUpSection: React.FC<CardFollowUpSectionProps> = ({
   followUp,
   className = '',
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
   const bilingual = useSettingsStore((s) => s.bilingual);
+  const isFollowUpRecorded = useGameStore((s) =>
+    s.gameState?.followUpOpenedCardIds?.includes(cardId)
+  );
+  const recordFollowUpOpened = useGameStore((s) => s.recordFollowUpOpened);
+  const isOnlineMode = useMultiplayerStore((s) => s.isOnlineMode);
+  const sendAction = useMultiplayerStore((s) => s.sendAction);
 
-  // Reset expansion whenever the card changes
+  // Sync state: either locally opened or synced via host/gameState
+  const isOpen = localOpen || Boolean(isFollowUpRecorded);
+
+  // Reset local expansion whenever the card changes
   useEffect(() => {
-    setIsOpen(false);
+    setLocalOpen(false);
   }, [cardId]);
 
   const handleToggle = () => {
-    if (!isOpen) {
+    const nextState = !isOpen;
+    if (nextState) {
       trackEvent('follow_up_opened', { cardId, level });
+      recordFollowUpOpened(cardId);
+      if (isOnlineMode) {
+        sendAction({ action: 'OPEN_FOLLOW_UP', cardId });
+      }
     }
-    setIsOpen((prev) => !prev);
+    setLocalOpen(nextState);
   };
 
   return (

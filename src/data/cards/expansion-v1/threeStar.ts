@@ -3,6 +3,7 @@ import { expansionCard as c } from './helpers';
 export const expansionThreeStarCards = [
   c({
     id: 'exp1-three-01',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'single',
     zh: '有哪一部分的你，是你很希望重要的人可以真正理解的？',
@@ -23,6 +24,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-02',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'pair',
     zh: '選一個人。各自說一件透過這場對話，你覺得自己更理解對方的事情。',
@@ -40,6 +42,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-03',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'discussion',
     zh: '你們覺得一段關係裡，可以很愛一個人，卻不真正理解他嗎？',
@@ -57,6 +60,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-04',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'othersToDrawer',
     zh: '其他人各自分享一件抽卡者可能低估了、但你們曾真實感受過的一項優點或力量。',
@@ -74,6 +78,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-05',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'single',
     zh: '哪一種孤單，是你覺得最不容易被別人看出來的？',
@@ -95,6 +100,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-06',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'discussion',
     zh: '你們覺得真正的修復，一定需要原諒嗎？',
@@ -113,6 +119,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-07',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'othersToDrawer',
     zh: '其他人各自說一件你希望抽卡者未來一直記得、不要輕易懷疑自己的事情。',
@@ -130,6 +137,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-08',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'pair',
     zh: '選一個人。各自分享一條如果我們要長久相處，你希望彼此尊重的界線。',
@@ -148,6 +156,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-09',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'chooseOne',
     responderRule: 'selectedPlayer',
@@ -167,6 +176,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-10',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'single',
     zh: '你最害怕讓哪一種人失望？為什麼？',
@@ -183,6 +193,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-11',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'single',
     zh: '當你開始在乎一個人時，你內心最容易浮現什麼樣的害怕或不安全感？',
@@ -200,6 +211,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-12',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'discussion',
     zh: '你們覺得「完全誠實」永遠是一件好事嗎？還是有些真話也需要選擇怎麼說？',
@@ -217,6 +229,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-13',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'single',
     zh: '現在的生活裡，什麼事情最容易讓你感覺「這一切是有意義的」？',
@@ -233,6 +246,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-14',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'othersToDrawer',
     zh: '其他人各自說一句：「有一件關於你的事情，我希望你不要忘記……」',
@@ -250,6 +264,7 @@ export const expansionThreeStarCards = [
   }),
   c({
     id: 'exp1-three-15',
+    reviewStatus: 'approved',
     level: 'three-star',
     interaction: 'single',
     zh: '在重要的關係裡，你最容易因為什麼開始懷疑自己？',

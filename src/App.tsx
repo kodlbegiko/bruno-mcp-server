@@ -4,6 +4,7 @@ import { useGameStore } from './store/gameStore';
 import { useMultiplayerStore } from './store/multiplayerStore';
 import { GameMode, SessionGoalMinutes } from './types/game';
 import { CardLevel } from './types/card';
+import { RelationshipTag } from './data/cards/types';
 import { QuestionSetId } from './domain/questions/questionSets';
 import { Home } from './pages/Home';
 import { Setup } from './pages/Setup';
@@ -58,6 +59,7 @@ export const App: React.FC = () => {
   const [hostStartingLevel, setHostStartingLevel] = useState<CardLevel>('icebreaker');
   const [hostSessionGoal, setHostSessionGoal] = useState<SessionGoalMinutes>(null);
   const [hostQuestionSetId, setHostQuestionSetId] = useState<QuestionSetId>('full');
+  const [hostTargetRelationship, setHostTargetRelationship] = useState<RelationshipTag | undefined>(undefined);
 
   // Check URL query for direct room invite (?room=ABC123)
   useEffect(() => {
@@ -114,12 +116,14 @@ export const App: React.FC = () => {
     mode: GameMode,
     sessionGoal: SessionGoalMinutes,
     startingLevel?: CardLevel,
-    questionSetId: QuestionSetId = 'full'
+    questionSetId: QuestionSetId = 'full',
+    targetRelationship?: RelationshipTag
   ) => {
     setHostGameMode(mode);
     setHostSessionGoal(sessionGoal);
     if (startingLevel) setHostStartingLevel(startingLevel);
     setHostQuestionSetId(questionSetId);
+    setHostTargetRelationship(targetRelationship);
     setCurrentRoute('online-waiting');
   };
 
@@ -136,7 +140,8 @@ export const App: React.FC = () => {
       hostGameMode,
       hostSessionGoal,
       hostGameMode === 'free' ? hostStartingLevel : 'icebreaker',
-      hostQuestionSetId
+      hostQuestionSetId,
+      hostTargetRelationship
     );
 
     const isDirectThreeStar = hostGameMode === 'free' && hostStartingLevel === 'three-star';

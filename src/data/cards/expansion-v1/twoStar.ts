@@ -3,6 +3,7 @@ import { expansionCard as c } from './helpers';
 export const expansionTwoStarCards = [
   c({
     id: 'exp1-two-01',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'single',
     zh: '當你狀態不好的時候，你最希望別人怎麼陪你？',
@@ -23,6 +24,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-02',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'pair',
     zh: '選一個人。你們各自說說：什麼會讓你感覺自己真的被理解？',
@@ -40,6 +42,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-03',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'single',
     zh: '有哪一條界線，是你現在比以前更懂得保護的？',
@@ -56,6 +59,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-04',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'discussion',
     zh: '什麼樣的道歉，對你來說才算真正有意義？',
@@ -73,6 +77,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-05',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'othersToDrawer',
     zh: '其他人各自說一個你們認為抽卡者可能低估了自己的優點。',
@@ -90,6 +95,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-06',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'single',
     zh: '發生衝突時，你通常會想立刻說清楚、先離開一下，還是暫時沉默？',
@@ -111,6 +117,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-07',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'pair',
     zh: '選一個人。說一個你覺得自己可以從對方身上學到的地方。',
@@ -128,6 +135,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-08',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'discussion',
     zh: '你們覺得在人際關係裡，「誠實」和「善良」發生衝突時該怎麼選？',
@@ -145,6 +153,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-09',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'all',
     zh: '每個人說一件你希望親近的人能更常主動問你的事情。',
@@ -162,6 +171,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-10',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'single',
     zh: '什麼時候會讓你產生「我真的屬於這裡」的感覺？',
@@ -178,6 +188,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-11',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'chooseOne',
     responderRule: 'selectedPlayer',
@@ -197,6 +208,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-12',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'discussion',
     zh: '你們認為「很親近」一定代表「很了解彼此」嗎？',
@@ -214,6 +226,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-13',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'pair',
     zh: '選一個人。你們各自說說：信任一個人對你而言通常是慢慢累積，還是某個瞬間決定的？',
@@ -231,6 +244,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-14',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'othersToDrawer',
     zh: '其他人各自分享：如果抽卡者低潮，你覺得他可能最需要哪一種陪伴？最後讓他說答案準不準。',
@@ -249,6 +263,7 @@ export const expansionTwoStarCards = [
   }),
   c({
     id: 'exp1-two-15',
+    reviewStatus: 'approved',
     level: 'two-star',
     interaction: 'single',
     zh: '有什麼你以前很相信的事情，現在已經不再那麼相信了？',

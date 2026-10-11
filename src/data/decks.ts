@@ -61,8 +61,10 @@ export function assertCardDatabase(): void {
       throw new Error(`Card ${card.id} has empty Chinese question`);
     }
 
-    if (card.needsReview) {
-      throw new Error(`Card ${card.id} is marked as needsReview`);
+    if (card.needsReview || card.reviewStatus !== 'approved') {
+      throw new Error(
+        `Card ${card.id} is not approved for production release (status: ${card.reviewStatus}, needsReview: ${card.needsReview})`
+      );
     }
   }
 }

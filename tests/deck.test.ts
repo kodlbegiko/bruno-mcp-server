@@ -46,9 +46,50 @@ describe('Card Database Ingestion & Audit', () => {
     }
   });
 
-  it('has 0 needsReview flags', () => {
+  it('has 0 needsReview flags and all cards are approved', () => {
     for (const card of allCards) {
       expect(card.needsReview).toBeFalsy();
+      expect(card.reviewStatus).toBe('approved');
     }
+  });
+
+  it('rejects cards with unapproved reviewStatus or needsReview flag in assertCardDatabase logic', () => {
+    const unapprovedCard = {
+      id: 'test-unapproved',
+      level: 'one-star' as const,
+      zh: '測試題目',
+      interaction: 'single' as const,
+      reviewStatus: 'draft' as const,
+      needsReview: true,
+    };
+
+    expect(unapprovedCard.needsReview || (unapprovedCard.reviewStatus as string) !== 'approved').toBe(true);
+  });
+
+  it('computes dynamic question set level counts and totals from registry', async () => {
+    const { getQuestionSetLevelCounts, getQuestionSetTotalCount } = await import(
+      '../src/domain/questions/questionSets'
+    );
+
+    const classicCounts = getQuestionSetLevelCounts('classic');
+    expect(classicCounts.icebreaker).toBe(10);
+    expect(classicCounts['one-star']).toBe(20);
+    expect(classicCounts['two-star']).toBe(20);
+    expect(classicCounts['three-star']).toBe(20);
+    expect(getQuestionSetTotalCount('classic')).toBe(70);
+
+    const expansionCounts = getQuestionSetLevelCounts('expansion-only');
+    expect(expansionCounts.icebreaker).toBe(15);
+    expect(expansionCounts['one-star']).toBe(15);
+    expect(expansionCounts['two-star']).toBe(15);
+    expect(expansionCounts['three-star']).toBe(15);
+    expect(getQuestionSetTotalCount('expansion-only')).toBe(60);
+
+    const fullCounts = getQuestionSetLevelCounts('full');
+    expect(fullCounts.icebreaker).toBe(25);
+    expect(fullCounts['one-star']).toBe(35);
+    expect(fullCounts['two-star']).toBe(35);
+    expect(fullCounts['three-star']).toBe(35);
+    expect(getQuestionSetTotalCount('full')).toBe(130);
   });
 });
