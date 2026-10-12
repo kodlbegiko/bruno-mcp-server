@@ -72,12 +72,12 @@ describe('V2.2 Architectural Refinements Suite', () => {
       expect(highest).toBe('two-star');
     });
 
-    it('defaults to icebreaker when no cards were revealed', () => {
+    it('returns null when no cards were revealed', () => {
       const mockState: Partial<GameState> = {
         revealedCardIds: [],
       };
       const highest = getHighestRevealedLevel(mockState as GameState);
-      expect(highest).toBe('icebreaker');
+      expect(highest).toBeNull();
     });
   });
 
@@ -175,6 +175,47 @@ describe('V2.2 Architectural Refinements Suite', () => {
       // Alice reconnects
       useGameStore.getState().setPlayerAvailability('p1', true);
       expect(useGameStore.getState().gameState?.inactivePlayerIds).not.toContain('p1');
+    });
+
+    it('prunes disconnected player from currentSelection.selectedPlayerIds', () => {
+      useGameStore.getState().initGame(
+        [
+          { id: 'p1', name: 'Alice' },
+          { id: 'p2', name: 'Bob' },
+        ],
+        'free',
+        null
+      );
+
+      // Select Bob as answering player
+      useGameStore.getState().selectPlayer('p2');
+      expect(useGameStore.getState().gameState?.currentSelection?.selectedPlayerIds).toContain('p2');
+
+      // Bob disconnects
+      useGameStore.getState().setPlayerAvailability('p2', false);
+      expect(useGameStore.getState().gameState?.currentSelection?.selectedPlayerIds).not.toContain('p2');
+      expect(useGameStore.getState().selectedPlayerIds).not.toContain('p2');
+    });
+
+    it('removePlayer permanently removes player and preserves drawer validity', () => {
+      useGameStore.getState().initGame(
+        [
+          { id: 'p1', name: 'Alice' },
+          { id: 'p2', name: 'Bob' },
+          { id: 'p3', name: 'Charlie' },
+        ],
+        'free',
+        null
+      );
+
+      // Select Charlie
+      useGameStore.getState().selectPlayer('p3');
+
+      // Remove Charlie
+      useGameStore.getState().removePlayer('p3');
+      const state = useGameStore.getState().gameState;
+      expect(state?.players.map((p) => p.id)).toEqual(['p1', 'p2']);
+      expect(state?.currentSelection?.selectedPlayerIds).not.toContain('p3');
     });
 
     it('reconcileThreeStarConsent auto-accepts when remaining active players have accepted', () => {

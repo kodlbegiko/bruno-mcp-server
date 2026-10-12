@@ -53,17 +53,42 @@ describe('Card Database Ingestion & Audit', () => {
     }
   });
 
-  it('rejects cards with unapproved reviewStatus or needsReview flag in assertCardDatabase logic', () => {
-    const unapprovedCard = {
-      id: 'test-unapproved',
+  it('rejects cards with unapproved reviewStatus or needsReview flag in assertCardDatabase logic', async () => {
+    const { validateCard, assertCardDatabase: assertFullDatabase } = await import(
+      '../src/data/cards/validation'
+    );
+
+    const draftCard = {
+      id: 'test-draft',
       level: 'one-star' as const,
-      zh: '測試題目',
+      zh: '測試草稿題目',
+      en: 'Test draft question',
       interaction: 'single' as const,
+      topic: 'values' as const,
+      emotionalTone: 'reflective' as const,
+      intensity: 2 as const,
+      relationshipTags: ['friends' as const],
+      packId: 'original' as const,
       reviewStatus: 'draft' as const,
+      needsReview: false,
+    };
+
+    const draftErrors = validateCard(draftCard, { production: true });
+    expect(draftErrors.some((e) => e.includes('not approved for production release'))).toBe(true);
+
+    const needsReviewCard = {
+      ...draftCard,
+      id: 'test-needs-review',
+      reviewStatus: 'approved' as const,
       needsReview: true,
     };
 
-    expect(unapprovedCard.needsReview || (unapprovedCard.reviewStatus as string) !== 'approved').toBe(true);
+    const reviewErrors = validateCard(needsReviewCard, { production: true });
+    expect(reviewErrors.some((e) => e.includes('still marked needsReview'))).toBe(true);
+
+    const report = assertFullDatabase([draftCard], 1, { production: true });
+    expect(report.valid).toBe(false);
+    expect(report.errors.length).toBeGreaterThan(0);
   });
 
   it('computes dynamic question set level counts and totals from registry', async () => {

@@ -92,8 +92,16 @@ export interface ValidationReport {
   levelBreakdown: Record<CardLevel, number>;
 }
 
-export function validateCard(card: ConversationCard): string[] {
+export interface ValidateCardOptions {
+  production?: boolean;
+}
+
+export function validateCard(
+  card: ConversationCard,
+  options: ValidateCardOptions = { production: true }
+): string[] {
   const errors: string[] = [];
+  const isProduction = options.production !== false;
 
   if (!card.id || typeof card.id !== 'string') {
     errors.push(`Card missing valid id: ${JSON.stringify(card)}`);
@@ -111,17 +119,71 @@ export function validateCard(card: ConversationCard): string[] {
     errors.push(`[${card.id}] Invalid interaction type: "${card.interaction}"`);
   }
 
-  if (card.topic && !VALID_TOPICS.has(card.topic)) {
-    errors.push(`[${card.id}] Invalid topic: "${card.topic}"`);
-  }
+  // Production Gate: reviewStatus MUST be 'approved'
+  if (isProduction) {
+    if (card.reviewStatus !== 'approved') {
+      errors.push(
+        `[${card.id}] Card is not approved for production release: status is "${card.reviewStatus ?? 'missing'}"`
+      );
+    }
 
-  if (card.emotionalTone && !VALID_TONES.has(card.emotionalTone)) {
-    errors.push(`[${card.id}] Invalid emotionalTone: "${card.emotionalTone}"`);
-  }
+    if (card.needsReview === true) {
+      errors.push(`[${card.id}] Card is still marked needsReview: true`);
+    }
 
-  if (card.intensity !== undefined) {
-    if (!Number.isInteger(card.intensity) || card.intensity < 1 || card.intensity > 5) {
-      errors.push(`[${card.id}] Invalid intensity: ${card.intensity} (must be integer 1-5)`);
+    // Production cards require complete metadata
+    if (!card.en || typeof card.en !== 'string' || card.en.trim().length === 0) {
+      errors.push(`[${card.id}] Missing or empty en text for production release`);
+    }
+
+    if (!card.topic || !VALID_TOPICS.has(card.topic)) {
+      errors.push(`[${card.id}] Missing or invalid topic for production release: "${card.topic}"`);
+    }
+
+    if (!card.emotionalTone || !VALID_TONES.has(card.emotionalTone)) {
+      errors.push(
+        `[${card.id}] Missing or invalid emotionalTone for production release: "${card.emotionalTone}"`
+      );
+    }
+
+    if (
+      card.intensity === undefined ||
+      !Number.isInteger(card.intensity) ||
+      card.intensity < 1 ||
+      card.intensity > 5
+    ) {
+      errors.push(
+        card.intensity === undefined
+          ? `[${card.id}] Missing intensity for production release`
+          : `[${card.id}] Invalid intensity for production release: ${card.intensity} (must be integer 1-5)`
+      );
+    }
+
+    if (!card.relationshipTags || card.relationshipTags.length === 0) {
+      errors.push(`[${card.id}] Missing relationshipTags for production release`);
+    }
+
+    if (!card.packId || (card.packId !== 'original' && card.packId !== 'expansion-v1')) {
+      errors.push(`[${card.id}] Missing or invalid packId for production release: "${card.packId}"`);
+    }
+  } else {
+    // Non-production draft checks
+    if (card.topic && !VALID_TOPICS.has(card.topic)) {
+      errors.push(`[${card.id}] Invalid topic: "${card.topic}"`);
+    }
+
+    if (card.emotionalTone && !VALID_TONES.has(card.emotionalTone)) {
+      errors.push(`[${card.id}] Invalid emotionalTone: "${card.emotionalTone}"`);
+    }
+
+    if (card.intensity !== undefined) {
+      if (!Number.isInteger(card.intensity) || card.intensity < 1 || card.intensity > 5) {
+        errors.push(`[${card.id}] Invalid intensity: ${card.intensity} (must be integer 1-5)`);
+      }
+    }
+
+    if (card.reviewStatus && !VALID_REVIEW_STATUSES.has(card.reviewStatus)) {
+      errors.push(`[${card.id}] Invalid reviewStatus: "${card.reviewStatus}"`);
     }
   }
 
@@ -158,16 +220,13 @@ export function validateCard(card: ConversationCard): string[] {
     }
   }
 
-  if (card.reviewStatus && !VALID_REVIEW_STATUSES.has(card.reviewStatus)) {
-    errors.push(`[${card.id}] Invalid reviewStatus: "${card.reviewStatus}"`);
-  }
-
   return errors;
 }
 
 export function assertCardDatabase(
   cards: ConversationCard[],
-  expectedTotal = 130
+  expectedTotal = 130,
+  options: ValidateCardOptions = { production: true }
 ): ValidationReport {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -190,7 +249,7 @@ export function assertCardDatabase(
       levelBreakdown[card.level] += 1;
     }
 
-    const cardErrors = validateCard(card);
+    const cardErrors = validateCard(card, options);
     errors.push(...cardErrors);
   }
 

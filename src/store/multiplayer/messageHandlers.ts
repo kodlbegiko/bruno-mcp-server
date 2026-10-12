@@ -134,6 +134,7 @@ export function handleHostIncomingMessage(
       existingPlayer.peerId = conn.peer;
       existingPlayer.connectionStatus = 'connected';
       delete existingPlayer.disconnectedAt;
+      delete existingPlayer.graceExpired;
       const updatedPlayers = [...ctx.players];
 
       peerManager.getHostConnections().set(conn.peer, conn);
@@ -195,7 +196,8 @@ export function handleHostIncomingMessage(
       const isHostOnlyAction =
         actionPayload.action === 'CHANGE_LEVEL' ||
         actionPayload.action === 'END_GAME' ||
-        actionPayload.action === 'RESET_GAME';
+        actionPayload.action === 'RESET_GAME' ||
+        actionPayload.action === 'REMOVE_PLAYER';
 
       if (isHostOnlyAction && !sender.isHost) {
         console.warn(
@@ -216,8 +218,7 @@ export function handleHostIncomingMessage(
           actionPayload.action === 'SKIP_CARD' ||
           actionPayload.action === 'SELECT_PLAYER' ||
           actionPayload.action === 'OPEN_FOLLOW_UP' ||
-          actionPayload.action === 'CLOSE_FOLLOW_UP' ||
-          actionPayload.action === 'TOGGLE_FOLLOW_UP';
+          actionPayload.action === 'CLOSE_FOLLOW_UP';
 
         if (isTurnRestrictedAction && !isCurrentDrawer && !sender.isHost) {
           console.warn(

@@ -17,6 +17,14 @@ export const expansionThreeStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 0,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 3,
+      group: 0,
+    },
     followUp: {
       zh: '你覺得是什麼讓這一部分一直不容易被看見？',
       en: 'What do you think makes this part of you difficult for others to see?',
@@ -39,6 +47,14 @@ export const expansionThreeStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 1,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 1,
+    },
   }),
   c({
     id: 'exp1-three-03',
@@ -57,6 +73,14 @@ export const expansionThreeStarCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 0,
+      friends: 2,
+      dating: 3,
+      couples: 3,
+      family: 3,
+      group: 1,
+    },
   }),
   c({
     id: 'exp1-three-04',
@@ -93,6 +117,14 @@ export const expansionThreeStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 0,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 0,
+    },
     followUp: {
       zh: '在那種時候，你最希望有人做什麼？',
       en: 'In those moments, what do you most wish someone would do?',
@@ -215,6 +247,14 @@ export const expansionThreeStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 0,
+      friends: 2,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 0,
+    },
   }),
   c({
     id: 'exp1-three-12',
@@ -286,5 +326,13 @@ export const expansionThreeStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 0,
+      friends: 2,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 0,
+    },
   }),
 ];

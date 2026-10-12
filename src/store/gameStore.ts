@@ -58,6 +58,7 @@ interface GameStore {
   closeFollowUp: () => void;
   recordFollowUpOpened: (cardId?: string) => void;
   setPlayerAvailability: (playerId: string, available: boolean) => void;
+  removePlayer: (playerId: string) => void;
   selectPlayer: (playerId: string) => void;
   clearSelection: () => void;
   dismissTimeReminder: () => void;
@@ -480,13 +481,59 @@ export const useGameStore = create<GameStore>((set, get) => ({
       );
     }
 
+    // Prune disconnected player from active target selection
+    let updatedSelection = game.currentSelection;
+    let selectedPlayerIds = get().selectedPlayerIds;
+    if (!available) {
+      const filtered = (game.currentSelection?.selectedPlayerIds || []).filter(
+        (id) => id !== playerId
+      );
+      updatedSelection = { selectedPlayerIds: filtered };
+      selectedPlayerIds = selectedPlayerIds.filter((id) => id !== playerId);
+    }
+
     const updatedState: GameState = {
       ...game,
       inactivePlayerIds: [...inactive],
       drawerIndex: nextDrawerIndex,
+      currentSelection: updatedSelection,
     };
     saveGameState(updatedState);
-    set({ gameState: updatedState });
+    set({ gameState: updatedState, selectedPlayerIds });
+  },
+
+  removePlayer: (playerId: string) => {
+    const game = get().gameState;
+    if (!game) return;
+
+    const remainingPlayers = game.players.filter((p) => p.id !== playerId);
+    if (remainingPlayers.length === 0) return;
+
+    const inactive = (game.inactivePlayerIds ?? []).filter((id) => id !== playerId);
+    let nextDrawerIndex = game.drawerIndex;
+    if (nextDrawerIndex >= remainingPlayers.length) {
+      nextDrawerIndex = 0;
+    }
+    nextDrawerIndex = getNextEligibleDrawerIndex(remainingPlayers, nextDrawerIndex, inactive);
+
+    const updatedSelection = {
+      selectedPlayerIds: (game.currentSelection?.selectedPlayerIds || []).filter(
+        (id) => id !== playerId
+      ),
+    };
+
+    const updatedState: GameState = {
+      ...game,
+      players: remainingPlayers,
+      inactivePlayerIds: inactive,
+      drawerIndex: nextDrawerIndex,
+      currentSelection: updatedSelection,
+    };
+    saveGameState(updatedState);
+    set({
+      gameState: updatedState,
+      selectedPlayerIds: get().selectedPlayerIds.filter((id) => id !== playerId),
+    });
   },
 
   confirmThreeStarConsent: () => {

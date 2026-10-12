@@ -38,6 +38,14 @@ export const expansionIcebreakerCards = [
     topic: 'identity',
     intensity: 1,
     emotionalTone: 'light',
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 3,
+      dating: 2,
+      couples: 2,
+      family: 2,
+      group: 3,
+    },
     relationshipTags: [
       'new-friends',
       'friends',
@@ -66,6 +74,14 @@ export const expansionIcebreakerCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 3,
+      dating: 3,
+      couples: 2,
+      family: 2,
+      group: 2,
+    },
   }),
   c({
     id: 'exp1-ice-04',
@@ -150,6 +166,14 @@ export const expansionIcebreakerCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 3,
+      dating: 3,
+      couples: 2,
+      family: 1,
+      group: 2,
+    },
   }),
   c({
     id: 'exp1-ice-08',
@@ -170,6 +194,14 @@ export const expansionIcebreakerCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 3,
+      dating: 3,
+      couples: 2,
+      family: 1,
+      group: 2,
+    },
   }),
   c({
     id: 'exp1-ice-09',
@@ -227,6 +259,14 @@ export const expansionIcebreakerCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 3,
+      dating: 3,
+      couples: 2,
+      family: 2,
+      group: 2,
+    },
   }),
   c({
     id: 'exp1-ice-12',
@@ -284,6 +324,14 @@ export const expansionIcebreakerCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 2,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 2,
+    },
   }),
   c({
     id: 'exp1-ice-15',

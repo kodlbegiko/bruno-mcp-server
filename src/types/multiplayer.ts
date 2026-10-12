@@ -12,6 +12,7 @@ export interface OnlinePlayer {
   reconnectToken?: string;
   connectionStatus?: 'connected' | 'reconnecting' | 'disconnected';
   disconnectedAt?: number;
+  graceExpired?: boolean;
 }
 
 export type PeerMessageType =
@@ -39,7 +40,7 @@ export type ClientActionType =
   | 'SELECT_PLAYER'
   | 'OPEN_FOLLOW_UP'
   | 'CLOSE_FOLLOW_UP'
-  | 'TOGGLE_FOLLOW_UP'
+  | 'REMOVE_PLAYER'
   | 'END_GAME'
   | 'RESET_GAME';
 

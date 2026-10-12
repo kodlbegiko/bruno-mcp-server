@@ -18,6 +18,14 @@ export const expansionOneStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 2,
+      dating: 3,
+      couples: 2,
+      family: 1,
+      group: 2,
+    },
   }),
   c({
     id: 'exp1-one-02',
@@ -55,6 +63,14 @@ export const expansionOneStarCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 2,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 2,
+    },
   }),
   c({
     id: 'exp1-one-04',
@@ -75,6 +91,14 @@ export const expansionOneStarCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 3,
+      dating: 3,
+      couples: 2,
+      family: 1,
+      group: 3,
+    },
   }),
   c({
     id: 'exp1-one-05',
@@ -148,6 +172,14 @@ export const expansionOneStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 0,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 2,
+    },
   }),
   c({
     id: 'exp1-one-09',
@@ -167,6 +199,14 @@ export const expansionOneStarCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 2,
+      friends: 3,
+      dating: 3,
+      couples: 2,
+      family: 1,
+      group: 2,
+    },
   }),
   c({
     id: 'exp1-one-10',
@@ -263,6 +303,14 @@ export const expansionOneStarCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 1,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 2,
+    },
   }),
   c({
     id: 'exp1-one-15',

@@ -33,6 +33,14 @@ export const icebreakerCards: ConversationCard[] = [
     intensity: 1,
     emotionalTone: 'light',
     relationshipTags: ['new-friends', 'friends', 'dating', 'couples', 'family', 'group'],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 3,
+      dating: 3,
+      couples: 2,
+      family: 2,
+      group: 3,
+    },
     reviewStatus: 'approved',
   },
   {
@@ -102,6 +110,14 @@ export const icebreakerCards: ConversationCard[] = [
     intensity: 1,
     emotionalTone: 'light',
     relationshipTags: ['new-friends', 'friends', 'group'],
+    relationshipFit: {
+      'new-friends': 2,
+      friends: 3,
+      dating: 0,
+      couples: 0,
+      family: 2,
+      group: 3,
+    },
     reviewStatus: 'approved',
   },
   {
@@ -119,6 +135,14 @@ export const icebreakerCards: ConversationCard[] = [
     intensity: 2,
     emotionalTone: 'reflective',
     relationshipTags: ['new-friends', 'friends', 'dating', 'couples', 'family', 'group'],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 2,
+      dating: 3,
+      couples: 2,
+      family: 1,
+      group: 3,
+    },
     reviewStatus: 'approved',
   },
   {
@@ -153,6 +177,14 @@ export const icebreakerCards: ConversationCard[] = [
     intensity: 2,
     emotionalTone: 'warm',
     relationshipTags: ['friends', 'dating', 'couples', 'family', 'group'],
+    relationshipFit: {
+      'new-friends': 1,
+      friends: 2,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 1,
+    },
     reviewStatus: 'approved',
   },
   {
@@ -170,6 +202,15 @@ export const icebreakerCards: ConversationCard[] = [
     intensity: 1,
     emotionalTone: 'light',
     relationshipTags: ['new-friends', 'friends', 'dating', 'couples', 'family', 'group'],
+    sensitivity: ['public-sharing'],
+    relationshipFit: {
+      'new-friends': 2,
+      friends: 3,
+      dating: 1,
+      couples: 1,
+      family: 2,
+      group: 3,
+    },
     reviewStatus: 'approved',
   },
 ];

@@ -16,6 +16,14 @@ export const oneStarCards: ConversationCard[] = [
     intensity: 2,
     emotionalTone: 'warm',
     relationshipTags: ['new-friends', 'friends', 'dating', 'couples', 'group'],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 2,
+      dating: 3,
+      couples: 1,
+      family: 0,
+      group: 3,
+    },
     reviewStatus: 'approved',
   },
   {
@@ -67,6 +75,14 @@ export const oneStarCards: ConversationCard[] = [
     intensity: 2,
     emotionalTone: 'warm',
     relationshipTags: ['new-friends', 'friends', 'dating', 'couples', 'family', 'group'],
+    relationshipFit: {
+      'new-friends': 2,
+      friends: 3,
+      dating: 2,
+      couples: 3,
+      family: 2,
+      group: 2,
+    },
     reviewStatus: 'approved',
   },
   {
@@ -135,6 +151,14 @@ export const oneStarCards: ConversationCard[] = [
     intensity: 2,
     emotionalTone: 'reflective',
     relationshipTags: ['friends', 'dating', 'couples', 'group'],
+    relationshipFit: {
+      'new-friends': 2,
+      friends: 3,
+      dating: 1,
+      couples: 1,
+      family: 1,
+      group: 2,
+    },
     reviewStatus: 'approved',
   },
   {
@@ -169,6 +193,14 @@ export const oneStarCards: ConversationCard[] = [
     intensity: 2,
     emotionalTone: 'warm',
     relationshipTags: ['new-friends', 'friends', 'dating', 'couples', 'family', 'group'],
+    relationshipFit: {
+      'new-friends': 2,
+      friends: 2,
+      dating: 2,
+      couples: 3,
+      family: 3,
+      group: 1,
+    },
     reviewStatus: 'approved',
   },
   {
@@ -220,6 +252,14 @@ export const oneStarCards: ConversationCard[] = [
     intensity: 2,
     emotionalTone: 'reflective',
     relationshipTags: ['new-friends', 'friends', 'dating', 'couples', 'group'],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 2,
+      dating: 2,
+      couples: 1,
+      family: 1,
+      group: 2,
+    },
     reviewStatus: 'approved',
   },
   {
@@ -305,6 +345,14 @@ export const oneStarCards: ConversationCard[] = [
     intensity: 2,
     emotionalTone: 'light',
     relationshipTags: ['new-friends', 'friends', 'dating', 'couples', 'group'],
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 2,
+      dating: 2,
+      couples: 1,
+      family: 0,
+      group: 3,
+    },
     reviewStatus: 'approved',
   },
   {

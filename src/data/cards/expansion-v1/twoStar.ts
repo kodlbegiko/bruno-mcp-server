@@ -17,6 +17,14 @@ export const expansionTwoStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 0,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 3,
+      group: 1,
+    },
     followUp: {
       zh: '有沒有哪種「關心」反而會讓你更有壓力？',
       en: 'Is there a kind of support that actually makes you feel more pressured?',
@@ -39,6 +47,14 @@ export const expansionTwoStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 1,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 1,
+    },
   }),
   c({
     id: 'exp1-two-03',
@@ -56,6 +72,14 @@ export const expansionTwoStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 1,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 1,
+    },
   }),
   c({
     id: 'exp1-two-04',
@@ -110,6 +134,14 @@ export const expansionTwoStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 0,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 3,
+      group: 1,
+    },
     followUp: {
       zh: '你希望對方在那個時候怎麼做？',
       en: 'What do you wish the other person would do in that moment?',
@@ -176,6 +208,14 @@ export const expansionTwoStarCards = [
       'family',
       'group',
     ],
+    relationshipFit: {
+      'new-friends': 0,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 3,
+      group: 1,
+    },
   }),
   c({
     id: 'exp1-two-10',
@@ -249,6 +289,14 @@ export const expansionTwoStarCards = [
       'couples',
       'family',
     ],
+    relationshipFit: {
+      'new-friends': 1,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 1,
+    },
   }),
   c({
     id: 'exp1-two-14',

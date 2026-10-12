@@ -178,9 +178,20 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
 
               // Start 30s disconnect grace period
               peerManager.startDisconnectGrace(disconnectedPlayer.id, () => {
-                console.log(
-                  `[Multiplayer Host] Disconnect grace expired for player: ${disconnectedPlayer.name} (${disconnectedPlayer.id})`
-                );
+                const currentPlayers = get().players;
+                const target = currentPlayers.find((p) => p.id === disconnectedPlayer.id);
+                if (target && target.connectionStatus === 'disconnected') {
+                  const updated = currentPlayers.map((p) =>
+                    p.id === disconnectedPlayer.id ? { ...p, graceExpired: true } : p
+                  );
+                  set({ players: updated });
+                  peerManager.broadcastToGuests({
+                    type: 'PLAYER_LIST_UPDATE',
+                    senderId: hostPlayerId,
+                    payload: { players: updated },
+                  });
+                  get().broadcastState();
+                }
               }, 30000);
             }
           }

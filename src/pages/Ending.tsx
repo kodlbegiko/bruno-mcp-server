@@ -62,9 +62,9 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
   // Calculate cards revealed count strictly from revealed cards
   const revealedCount = (gameState.revealedCardIds || []).length;
 
-  // Calculate highest level actually revealed based on card metadata
+  // Calculate highest level actually revealed based on card metadata (or null if none)
   const highestLevel = getHighestRevealedLevel(gameState);
-  const highestLevelInfo = LEVEL_NAMES[highestLevel];
+  const highestLevelInfo = highestLevel ? LEVEL_NAMES[highestLevel] : null;
 
   const handlePlayAgain = () => {
     trackEvent('play_again');
@@ -80,12 +80,14 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
   const handleShare = async () => {
     trackEvent('share');
     const isEn = i18n.language === 'en';
+    const depthZh = highestLevelInfo ? `到達了【${highestLevelInfo.zh}】深度。` : '完成了溫馨對話。';
+    const depthEn = highestLevelInfo ? `and reached the [${highestLevelInfo.en}] depth.` : 'and had a meaningful conversation.';
     const shareTitle = isEn
       ? 'Deeply Know Someone · Conversation Session'
       : '深刻認識一個人 · 對話紀錄';
     const shareText = isEn
-      ? `Deeply Know Someone · Session Record ✨\nWe spent ${elapsedMinutes} minutes in deep dialogue, drew ${revealedCount} cards, and reached the [${highestLevelInfo.en}] depth.\n"Thank you for being open and truly listening."\n👉 Try online: https://deeply-know-someone.vercel.app`
-      : `深刻認識一個人 · 對話紀錄 ✨\n我們完成了 ${elapsedMinutes} 分鐘的深入對話，翻開了 ${revealedCount} 張卡牌，到達了【${highestLevelInfo.zh}】深度。\n「謝謝彼此的坦誠與聆聽。」\n👉 線上體驗：https://deeply-know-someone.vercel.app`;
+      ? `Deeply Know Someone · Session Record ✨\nWe spent ${elapsedMinutes} minutes in deep dialogue, drew ${revealedCount} cards, ${depthEn}\n"Thank you for being open and truly listening."\n👉 Try online: https://deeply-know-someone.vercel.app`
+      : `深刻認識一個人 · 對話紀錄 ✨\n我們完成了 ${elapsedMinutes} 分鐘的深入對話，翻開了 ${revealedCount} 張卡牌，${depthZh}\n「謝謝彼此的坦誠與聆聽。」\n👉 線上體驗：https://deeply-know-someone.vercel.app`;
     const shareUrl = 'https://deeply-know-someone.vercel.app';
 
     if (typeof navigator !== 'undefined' && navigator.share) {
@@ -207,13 +209,21 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
               {t('ending.highest_depth')}
             </span>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: highestLevelInfo.color }}
-              />
-              <span className="text-sm font-serif font-medium text-ink-900 dark:text-stone-100 truncate">
-                {highestLevelInfo.zh}
-              </span>
+              {highestLevelInfo ? (
+                <>
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: highestLevelInfo.color }}
+                  />
+                  <span className="text-sm font-serif font-medium text-ink-900 dark:text-stone-100 truncate">
+                    {highestLevelInfo.zh}
+                  </span>
+                </>
+              ) : (
+                <span className="text-xs font-serif text-ink-500 dark:text-stone-400">
+                  尚未開始深度對話
+                </span>
+              )}
             </div>
           </div>
         </div>

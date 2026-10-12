@@ -13,14 +13,18 @@ const LEVEL_RANK: Record<CardLevel, number> = {
  * Computes the highest CardLevel actually revealed in the game
  * based on card metadata, never relying on fragile ID prefix checks.
  *
- * If no cards were revealed, defaults to 'icebreaker'.
+ * If no cards were revealed, returns null.
  */
 export function getHighestRevealedLevel(
   gameState: GameState,
   getCard: (id: string) => { level: CardLevel } | null | undefined = getCardById
-): CardLevel {
+): CardLevel | null {
   const revealed = gameState.revealedCardIds ?? [];
-  let highest: CardLevel = 'icebreaker';
+  if (revealed.length === 0) {
+    return null;
+  }
+
+  let highest: CardLevel | null = null;
   let highestRank = -1;
 
   for (const id of revealed) {

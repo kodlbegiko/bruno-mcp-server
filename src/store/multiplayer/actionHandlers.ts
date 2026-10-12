@@ -2,6 +2,7 @@ import { ClientActionPayload, ThreeStarConsentState } from '../../types/multipla
 import { useGameStore } from '../gameStore';
 import { useMultiplayerStore } from '../multiplayerStore';
 import { peerManager } from './peerManager';
+import { getConsentEligiblePlayerIds, reconcileThreeStarConsent } from './consent';
 
 export interface HostActionContext {
   actorPlayerId: string;
@@ -127,11 +128,28 @@ export function executeHostAction(
     case 'CLOSE_FOLLOW_UP':
       game.closeFollowUp();
       break;
-    case 'TOGGLE_FOLLOW_UP': {
-      if (game.gameState?.activeFollowUpCardId) {
-        game.closeFollowUp();
-      } else {
-        game.openFollowUp();
+    case 'REMOVE_PLAYER': {
+      const targetId = actionPayload.targetPlayerId || actionPayload.playerId;
+      if (targetId) {
+        const remaining = mp.players.filter((p) => p.id !== targetId);
+        useMultiplayerStore.setState({ players: remaining });
+        peerManager.clearDisconnectGrace(targetId);
+        game.removePlayer(targetId);
+
+        const activePlayerIds = getConsentEligiblePlayerIds(remaining);
+        const reconciled = reconcileThreeStarConsent(mp.threeStarConsent, activePlayerIds);
+        if (reconciled?.status === 'accepted') {
+          game.confirmThreeStarConsent();
+          useMultiplayerStore.setState({ threeStarConsent: null });
+        } else {
+          useMultiplayerStore.setState({ threeStarConsent: reconciled });
+        }
+
+        peerManager.broadcastToGuests({
+          type: 'PLAYER_LIST_UPDATE',
+          senderId: mp.myPlayerId || 'host',
+          payload: { players: remaining },
+        });
       }
       break;
     }
