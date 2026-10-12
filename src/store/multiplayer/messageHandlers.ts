@@ -128,12 +128,32 @@ export function handleHostIncomingMessage(
         break;
       }
 
+      // Clear disconnect grace timer if active
+      peerManager.clearDisconnectGrace(existingPlayer.id);
+
       existingPlayer.peerId = conn.peer;
       existingPlayer.connectionStatus = 'connected';
+      delete existingPlayer.disconnectedAt;
       const updatedPlayers = [...ctx.players];
 
       peerManager.getHostConnections().set(conn.peer, conn);
       ctx.setPlayers(updatedPlayers);
+
+      // Re-enable player in game store
+      useGameStore.getState().setPlayerAvailability(existingPlayer.id, true);
+
+      // Reconcile three-star consent if pending
+      const currentConsent = useMultiplayerStore.getState().threeStarConsent;
+      if (currentConsent && currentConsent.status === 'pending') {
+        if (!currentConsent.requiredPlayerIds.includes(existingPlayer.id)) {
+          useMultiplayerStore.setState({
+            threeStarConsent: {
+              ...currentConsent,
+              requiredPlayerIds: [...currentConsent.requiredPlayerIds, existingPlayer.id],
+            },
+          });
+        }
+      }
 
       conn.send({
         type: 'JOIN_ACCEPTED',
@@ -156,6 +176,7 @@ export function handleHostIncomingMessage(
         senderId: ctx.myPlayerId || 'host',
         payload: { players: updatedPlayers },
       });
+      ctx.broadcastState();
       break;
     }
 
@@ -193,7 +214,10 @@ export function handleHostIncomingMessage(
           actionPayload.action === 'FLIP_CARD' ||
           actionPayload.action === 'DRAW_NEXT_CARD' ||
           actionPayload.action === 'SKIP_CARD' ||
-          actionPayload.action === 'SELECT_PLAYER';
+          actionPayload.action === 'SELECT_PLAYER' ||
+          actionPayload.action === 'OPEN_FOLLOW_UP' ||
+          actionPayload.action === 'CLOSE_FOLLOW_UP' ||
+          actionPayload.action === 'TOGGLE_FOLLOW_UP';
 
         if (isTurnRestrictedAction && !isCurrentDrawer && !sender.isHost) {
           console.warn(

@@ -7,10 +7,11 @@ export interface OnlinePlayer {
   id: string;
   name: string;
   isHost: boolean;
-  peerId: string;
+  peerId: string | null;
   isReady?: boolean;
   reconnectToken?: string;
   connectionStatus?: 'connected' | 'reconnecting' | 'disconnected';
+  disconnectedAt?: number;
 }
 
 export type PeerMessageType =
@@ -37,6 +38,7 @@ export type ClientActionType =
   | 'CANCEL_THREE_STAR'
   | 'SELECT_PLAYER'
   | 'OPEN_FOLLOW_UP'
+  | 'CLOSE_FOLLOW_UP'
   | 'TOGGLE_FOLLOW_UP'
   | 'END_GAME'
   | 'RESET_GAME';

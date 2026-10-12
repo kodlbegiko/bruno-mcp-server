@@ -19,6 +19,7 @@ import { useMultiplayerStore } from '../../store/multiplayerStore';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { prefetchCardAssets } from '../../utils/prefetch';
 import { trackEvent } from '../../utils/analytics';
+import { countEngagedCardsInLevel } from '../../domain/game/progress';
 
 interface GameBoardProps {
   onBackToHome: () => void;
@@ -45,6 +46,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   const dismissTimeReminder = useGameStore((s) => s.dismissTimeReminder);
   const endGame = useGameStore((s) => s.endGame);
   const resetGame = useGameStore((s) => s.resetGame);
+  const openFollowUp = useGameStore((s) => s.openFollowUp);
+  const closeFollowUp = useGameStore((s) => s.closeFollowUp);
 
   const soundEnabled = useSettingsStore((s) => s.soundEnabled);
   const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
@@ -113,9 +116,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
   const currentDeck = gameState.decks[currentLevel];
   const isDeckEmpty = !currentCard;
-  const cardsDrawnInLevel = (gameState.revealedCardIds || []).filter(
-    (id) => getCardById(id)?.level === currentLevel
-  ).length;
+  const cardsDrawnInLevel = countEngagedCardsInLevel(gameState, currentLevel);
 
   // Zero-latency prefetching: Warm up card back assets in background
   useEffect(() => {
@@ -127,6 +128,27 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     : null;
 
   const isMyTurn = !isOnlineMode || !drawer || drawer.id === myPlayerId;
+  const isFollowUpOpen = Boolean(
+    currentCard && gameState.activeFollowUpCardId === currentCard.id
+  );
+  const canControlFollowUp = !isOnlineMode || isMyTurn;
+
+  const handleOpenFollowUp = () => {
+    trackEvent('follow_up_opened', { cardId: currentCard?.id, level: currentLevel });
+    if (isOnlineMode) {
+      sendAction({ action: 'OPEN_FOLLOW_UP', cardId: currentCard?.id });
+    } else {
+      openFollowUp();
+    }
+  };
+
+  const handleCloseFollowUp = () => {
+    if (isOnlineMode) {
+      sendAction({ action: 'CLOSE_FOLLOW_UP', cardId: currentCard?.id });
+    } else {
+      closeFollowUp();
+    }
+  };
 
   // Accessible live speech content for screen readers
   const ariaAnnouncement = isCardFlipped && currentCard
@@ -355,6 +377,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                     cardId={currentCard.id}
                     level={currentCard.level}
                     followUp={currentCard.followUp}
+                    isOpen={isFollowUpOpen}
+                    canControl={canControlFollowUp}
+                    onOpen={handleOpenFollowUp}
+                    onClose={handleCloseFollowUp}
                   />
                 </div>
               )}

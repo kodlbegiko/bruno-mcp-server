@@ -1,59 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CardFollowUp, CardLevel } from '../../data/cards/types';
 import { useSettingsStore } from '../../store/settingsStore';
-import { useGameStore } from '../../store/gameStore';
-import { useMultiplayerStore } from '../../store/multiplayerStore';
-import { trackEvent } from '../../utils/analytics';
 
-interface CardFollowUpSectionProps {
+export interface CardFollowUpSectionProps {
   cardId: string;
   level: CardLevel;
   followUp: CardFollowUp;
+  isOpen: boolean;
+  canControl?: boolean;
+  onOpen: () => void;
+  onClose: () => void;
   className?: string;
 }
 
 export const CardFollowUpSection: React.FC<CardFollowUpSectionProps> = ({
-  cardId,
-  level,
   followUp,
+  isOpen,
+  canControl = true,
+  onOpen,
+  onClose,
   className = '',
 }) => {
-  const [localOpen, setLocalOpen] = useState(false);
   const bilingual = useSettingsStore((s) => s.bilingual);
-  const isFollowUpRecorded = useGameStore((s) =>
-    s.gameState?.followUpOpenedCardIds?.includes(cardId)
-  );
-  const recordFollowUpOpened = useGameStore((s) => s.recordFollowUpOpened);
-  const isOnlineMode = useMultiplayerStore((s) => s.isOnlineMode);
-  const sendAction = useMultiplayerStore((s) => s.sendAction);
-
-  // Sync state: either locally opened or synced via host/gameState
-  const isOpen = localOpen || Boolean(isFollowUpRecorded);
-
-  // Reset local expansion whenever the card changes
-  useEffect(() => {
-    setLocalOpen(false);
-  }, [cardId]);
 
   const handleToggle = () => {
-    const nextState = !isOpen;
-    if (nextState) {
-      trackEvent('follow_up_opened', { cardId, level });
-      recordFollowUpOpened(cardId);
-      if (isOnlineMode) {
-        sendAction({ action: 'OPEN_FOLLOW_UP', cardId });
-      }
+    if (!canControl) return;
+    if (isOpen) {
+      onClose();
+    } else {
+      onOpen();
     }
-    setLocalOpen(nextState);
   };
 
   return (
-    <div className={`w-full max-w-[340px] sm:max-w-[380px] flex flex-col items-center select-none ${className}`}>
+    <div
+      className={`w-full max-w-[340px] sm:max-w-[380px] flex flex-col items-center select-none ${className}`}
+    >
       <button
         type="button"
         onClick={handleToggle}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif text-ink-700 dark:text-stone-300 bg-paper-100/90 dark:bg-stone-800/90 hover:bg-paper-200/80 dark:hover:bg-stone-700/80 border border-paper-border dark:border-stone-700 shadow-2xs transition-all active:scale-95"
+        disabled={!canControl}
+        title={!canControl ? '由當前抽牌者主持深入追問' : undefined}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif transition-all ${
+          !canControl
+            ? 'opacity-70 cursor-not-allowed bg-paper-100/60 dark:bg-stone-800/60 text-ink-500 dark:text-stone-400 border border-paper-border/60 dark:border-stone-700/60'
+            : 'text-ink-700 dark:text-stone-300 bg-paper-100/90 dark:bg-stone-800/90 hover:bg-paper-200/80 dark:hover:bg-stone-700/80 border border-paper-border dark:border-stone-700 shadow-2xs active:scale-95 cursor-pointer'
+        }`}
         aria-expanded={isOpen}
       >
         <span className="text-sm leading-none">{isOpen ? '💬' : '✨'}</span>

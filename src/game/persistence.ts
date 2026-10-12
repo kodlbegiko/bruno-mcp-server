@@ -29,21 +29,32 @@ export function saveGameState(state: GameState): void {
   }
 }
 
+export const GAME_STATE_VERSION = 2;
+
 export function migrateGameState(raw: unknown): GameState | null {
   if (!raw || typeof raw !== 'object') {
     return null;
   }
-  const state = raw as Partial<GameState>;
-  if (typeof state.gameId !== 'string' || !Array.isArray(state.players)) {
+  const source = raw as Partial<GameState>;
+  if (typeof source.gameId !== 'string' || !Array.isArray(source.players)) {
     return null;
   }
   return {
-    ...state,
+    ...(source as GameState),
+    version: GAME_STATE_VERSION,
     /**
      * 舊版遊戲預設一定是原版 70 題 (classic)
      */
-    questionSetId: state.questionSetId ?? 'classic',
-  } as GameState;
+    questionSetId: source.questionSetId ?? 'classic',
+    revealedCardIds: Array.isArray(source.revealedCardIds) ? source.revealedCardIds : [],
+    skippedCardIds: Array.isArray(source.skippedCardIds) ? source.skippedCardIds : [],
+    followUpOpenedCardIds: Array.isArray(source.followUpOpenedCardIds)
+      ? source.followUpOpenedCardIds
+      : [],
+    activeFollowUpCardId:
+      typeof source.activeFollowUpCardId === 'string' ? source.activeFollowUpCardId : null,
+    inactivePlayerIds: Array.isArray(source.inactivePlayerIds) ? source.inactivePlayerIds : [],
+  };
 }
 
 export function loadGameState(): GameState | null {

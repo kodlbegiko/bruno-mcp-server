@@ -133,9 +133,39 @@ describe('Conversation Engine V1 Pacing Suite', () => {
       randomJitter: 0,
     });
 
-    expect(coupleScore).toBe(80); // 50 base + 30 relationship
+    expect(coupleScore).toBe(74); // 50 base + 24 relationship (2 tags)
     expect(genericScore).toBe(50); // 50 base
     expect(coupleScore).toBeGreaterThan(genericScore);
+
+    // Single tag card receives +30 bonus
+    const exclusiveCoupleCard: ConversationCard = {
+      id: 'exclusive-couple',
+      level: 'two-star',
+      zh: '我們相處時最契合的默契是什麼？',
+      interaction: 'pair',
+      relationshipTags: ['couples'],
+    };
+    expect(
+      scoreCandidate(exclusiveCoupleCard, [], {
+        targetRelationship: 'couples',
+        randomJitter: 0,
+      })
+    ).toBe(80); // 50 + 30
+
+    // Explicit relationshipFit metadata takes precedence (3 * 12 = +36)
+    const fitCard: ConversationCard = {
+      id: 'fit-card',
+      level: 'two-star',
+      zh: '伴侶專屬深入話題',
+      interaction: 'single',
+      relationshipFit: { couples: 3 },
+    };
+    expect(
+      scoreCandidate(fitCard, [], {
+        targetRelationship: 'couples',
+        randomJitter: 0,
+      })
+    ).toBe(86); // 50 + 36
   });
 
   it('shapes card 1 selection according to target relationship context in paceDeckCards', () => {

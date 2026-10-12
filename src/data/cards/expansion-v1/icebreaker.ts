@@ -11,6 +11,14 @@ export const expansionIcebreakerCards = [
     topic: 'daily-life',
     intensity: 1,
     emotionalTone: 'light',
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 3,
+      dating: 3,
+      couples: 2,
+      family: 2,
+      group: 3,
+    },
     relationshipTags: [
       'new-friends',
       'friends',
@@ -69,6 +77,14 @@ export const expansionIcebreakerCards = [
     topic: 'preferences',
     intensity: 1,
     emotionalTone: 'light',
+    relationshipFit: {
+      'new-friends': 3,
+      friends: 3,
+      dating: 3,
+      couples: 3,
+      family: 2,
+      group: 3,
+    },
     relationshipTags: [
       'new-friends',
       'friends',

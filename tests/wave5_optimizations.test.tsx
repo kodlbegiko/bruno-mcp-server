@@ -84,6 +84,7 @@ describe('Wave 5 Micro-Interactions & Accessibility Suite', () => {
               'two-star': { shuffledIds: ['two_01'], cursor: 0, usedIds: [] },
               'three-star': { shuffledIds: ['three_01'], cursor: 0, usedIds: [] },
             },
+            activeFollowUpCardId: null,
           },
         });
       });

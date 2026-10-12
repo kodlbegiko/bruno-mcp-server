@@ -62,7 +62,19 @@ export type SensitivityTag =
   | 'physical-touch'
   | 'money'
   | 'body'
-  | 'loss';
+  | 'loss'
+  | 'public-sharing';
+
+export type RelationshipFitScore = 0 | 1 | 2 | 3;
+
+export interface RelationshipFit {
+  'new-friends'?: RelationshipFitScore;
+  'friends'?: RelationshipFitScore;
+  'dating'?: RelationshipFitScore;
+  'couples'?: RelationshipFitScore;
+  'family'?: RelationshipFitScore;
+  'group'?: RelationshipFitScore;
+}
 
 export interface CardFollowUp {
   zh: string;
@@ -110,6 +122,8 @@ export interface ConversationCard {
   emotionalTone?: EmotionalTone;
 
   relationshipTags?: RelationshipTag[];
+
+  relationshipFit?: RelationshipFit;
 
   sensitivity?: SensitivityTag[];
 

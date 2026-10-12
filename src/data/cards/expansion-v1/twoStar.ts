@@ -143,6 +143,14 @@ export const expansionTwoStarCards = [
     topic: 'values',
     intensity: 3,
     emotionalTone: 'reflective',
+    relationshipFit: {
+      friends: 3,
+      group: 3,
+      dating: 2,
+      couples: 2,
+      family: 2,
+      'new-friends': 1,
+    },
     relationshipTags: [
       'friends',
       'dating',

@@ -147,6 +147,13 @@ export const expansionThreeStarCards = [
     emotionalTone: 'vulnerable',
     sensitivity: ['conflict'],
     minPlayers: 2,
+    relationshipFit: {
+      couples: 3,
+      dating: 3,
+      friends: 2,
+      family: 2,
+      'new-friends': 0,
+    },
     relationshipTags: [
       'friends',
       'dating',

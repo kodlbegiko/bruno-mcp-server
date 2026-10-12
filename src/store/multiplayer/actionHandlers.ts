@@ -122,9 +122,16 @@ export function executeHostAction(
       break;
     }
     case 'OPEN_FOLLOW_UP':
+      game.openFollowUp();
+      break;
+    case 'CLOSE_FOLLOW_UP':
+      game.closeFollowUp();
+      break;
     case 'TOGGLE_FOLLOW_UP': {
-      if (actionPayload.cardId) {
-        game.recordFollowUpOpened(actionPayload.cardId);
+      if (game.gameState?.activeFollowUpCardId) {
+        game.closeFollowUp();
+      } else {
+        game.openFollowUp();
       }
       break;
     }

@@ -40,6 +40,8 @@ export interface GameState {
   revealedCardIds?: string[];
   skippedCardIds?: string[];
   followUpOpenedCardIds?: string[];
+  activeFollowUpCardId: string | null;
+  inactivePlayerIds?: string[];
   status: 'playing' | 'ended';
   endedAt?: number;
 }

@@ -4,6 +4,7 @@ import { Share2, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/gameStore';
 import { LEVEL_NAMES } from '../game/progression';
+import { getHighestRevealedLevel } from '../domain/game/endingStats';
 import { Button } from '../components/ui/Button';
 import { trackEvent } from '../utils/analytics';
 
@@ -58,29 +59,11 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
   const endedTime = gameState.endedAt || Date.now();
   const elapsedMinutes = Math.max(1, Math.round((endedTime - gameState.startedAt) / (60 * 1000)));
 
-  // Calculate cards revealed count
-  const revealedCount = Array.isArray(gameState.revealedCardIds)
-    ? gameState.revealedCardIds.length
-    : gameState.cardsDrawnCount;
+  // Calculate cards revealed count strictly from revealed cards
+  const revealedCount = (gameState.revealedCardIds || []).length;
 
-  // Calculate highest level actually revealed
-  const levelsPlayed = (['three-star', 'two-star', 'one-star', 'icebreaker'] as const);
-  const revealedLevels = (gameState.revealedCardIds || [])
-    .map((id) => {
-      // Find level from deck cards
-      if (id.startsWith('ice-')) return 'icebreaker';
-      if (id.startsWith('one-')) return 'one-star';
-      if (id.startsWith('two-')) return 'two-star';
-      if (id.startsWith('three-')) return 'three-star';
-      return null;
-    })
-    .filter((lvl): lvl is (typeof levelsPlayed)[number] => !!lvl);
-
-  const highestLevel =
-    levelsPlayed.find((lvl) => revealedLevels.includes(lvl)) ||
-    levelsPlayed.find((lvl) => gameState.decks[lvl].cursor > 0) ||
-    gameState.currentLevel ||
-    'icebreaker';
+  // Calculate highest level actually revealed based on card metadata
+  const highestLevel = getHighestRevealedLevel(gameState);
   const highestLevelInfo = LEVEL_NAMES[highestLevel];
 
   const handlePlayAgain = () => {

@@ -7,6 +7,41 @@ export interface ConversationPacingOptions {
 }
 
 /**
+ * Computes relationship alignment bonus for a card.
+ *
+ * 1. If explicit card.relationshipFit[targetRelationship] is defined,
+ *    returns fitScore * 12 (scale 0..36).
+ * 2. Fallback: if card has relationshipTags, highly specific cards
+ *    (fewer tags) get higher alignment bonus than generic cards.
+ */
+export function getRelationshipBonus(
+  card: ConversationCard,
+  targetRelationship?: RelationshipTag
+): number {
+  if (!targetRelationship) return 0;
+
+  // Explicit metadata fit takes precedence
+  if (card.relationshipFit && targetRelationship in card.relationshipFit) {
+    const fit = card.relationshipFit[targetRelationship as keyof typeof card.relationshipFit];
+    if (typeof fit === 'number') {
+      return fit * 12;
+    }
+  }
+
+  // Fallback to generic relationshipTags
+  if (card.relationshipTags && card.relationshipTags.includes(targetRelationship)) {
+    const tagCount = card.relationshipTags.length;
+    if (tagCount === 1) return 30;
+    if (tagCount === 2) return 24;
+    if (tagCount === 3) return 18;
+    if (tagCount === 4) return 10;
+    return 4;
+  }
+
+  return 0;
+}
+
+/**
  * Computes a suitability score for a candidate card given the recent conversation history.
  */
 export function scoreCandidate(
@@ -72,11 +107,9 @@ export function scoreCandidate(
     }
   }
 
-  // 6. Relationship Context Alignment
-  if (options.targetRelationship && candidate.relationshipTags) {
-    if (candidate.relationshipTags.includes(options.targetRelationship)) {
-      score += 30;
-    }
+  // 6. Relationship Context Alignment (metadata fit takes precedence over generic tags)
+  if (options.targetRelationship) {
+    score += getRelationshipBonus(candidate, options.targetRelationship);
   }
 
   // 7. Random Jitter: Introduces organic variation while maintaining pacing curves
@@ -113,7 +146,18 @@ export function paceDeckCards(
     return isGentle && isNonSensitive;
   });
 
-  const firstCardPool = starterCandidates.length > 0 ? starterCandidates : remaining;
+  const relationshipFiltered = options.targetRelationship
+    ? starterCandidates.filter(
+        (c) => getRelationshipBonus(c, options.targetRelationship) > 0
+      )
+    : [];
+
+  const firstCardPool =
+    relationshipFiltered.length > 0
+      ? relationshipFiltered
+      : starterCandidates.length > 0
+      ? starterCandidates
+      : remaining;
   let bestStarterScore = -Infinity;
   let bestStarterIndex = 0;
 

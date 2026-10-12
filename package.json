@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "node ./node_modules/vite/bin/vite.js",
-    "build": "node ./node_modules/typescript/bin/tsc --noEmit && node ./node_modules/vite/bin/vite.js build",
+    "build": "npm run validate:content && node ./node_modules/typescript/bin/tsc --noEmit && node ./node_modules/vite/bin/vite.js build",
     "preview": "node ./node_modules/vite/bin/vite.js preview",
     "test": "node ./node_modules/vitest/vitest.mjs run",
     "test:watch": "node ./node_modules/vitest/vitest.mjs",
     "test:e2e": "node ./node_modules/@playwright/test/cli.js test",
-    "typecheck": "node ./node_modules/typescript/bin/tsc --noEmit"
+    "typecheck": "node ./node_modules/typescript/bin/tsc --noEmit",
+    "validate:content": "node ./node_modules/tsx/dist/cli.mjs ./scripts/validate-content.ts"
   },
   "dependencies": {
     "@types/qrcode": "^1.5.6",
@@ -40,6 +41,7 @@
     "jsdom": "^26.0.0",
     "postcss": "^8.5.2",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.3",
     "vite": "6.0.11",
     "vite-plugin-pwa": "^0.21.1",

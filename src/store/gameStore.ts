@@ -5,11 +5,28 @@ import { Player } from '../types/player';
 import { GameMode, GameState, SessionGoalMinutes } from '../types/game';
 import { getCardById } from '../data/decks';
 import { createPacedDeck, selectNextAdaptiveCard } from '../domain/conversation/conversationEngine';
-import { clearGameState, loadGameState, saveGameState } from '../game/persistence';
+import { clearGameState, loadGameState, saveGameState, GAME_STATE_VERSION } from '../game/persistence';
 import { resetSessionTimer } from '../utils/analytics';
 
 import { QuestionSetId } from '../domain/questions/questionSets';
 import { buildQuestionPool } from '../domain/questions/buildQuestionPool';
+
+export function getNextEligibleDrawerIndex(
+  players: Player[],
+  currentIndex: number,
+  inactivePlayerIds: string[] = []
+): number {
+  if (players.length === 0) return 0;
+  const inactive = new Set(inactivePlayerIds);
+  for (let offset = 1; offset <= players.length; offset += 1) {
+    const candidateIndex = (currentIndex + offset) % players.length;
+    const candidate = players[candidateIndex];
+    if (candidate && !inactive.has(candidate.id)) {
+      return candidateIndex;
+    }
+  }
+  return currentIndex;
+}
 
 interface GameStore {
   // State
@@ -37,7 +54,10 @@ interface GameStore {
   changeLevel: (level: CardLevel) => void;
   confirmThreeStarConsent: () => void;
   cancelThreeStarConsent: () => void;
-  recordFollowUpOpened: (cardId: string) => void;
+  openFollowUp: () => void;
+  closeFollowUp: () => void;
+  recordFollowUpOpened: (cardId?: string) => void;
+  setPlayerAvailability: (playerId: string, available: boolean) => void;
   selectPlayer: (playerId: string) => void;
   clearSelection: () => void;
   dismissTimeReminder: () => void;
@@ -85,7 +105,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       : null;
 
     const newGameState: GameState = {
-      version: 1,
+      version: GAME_STATE_VERSION,
       gameId: `game_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       players: players.map((p, idx) => ({
         id: p.id || `player_${idx + 1}`,
@@ -118,6 +138,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       revealedCardIds: [],
       skippedCardIds: [],
       followUpOpenedCardIds: [],
+      activeFollowUpCardId: null,
+      inactivePlayerIds: [],
       status: 'playing',
     };
 
@@ -217,7 +239,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       updatedShuffledIds[chosenIndexInShuffled] = temp;
     }
 
-    const nextDrawerIndex = (state.drawerIndex + 1) % state.players.length;
+    const nextDrawerIndex = getNextEligibleDrawerIndex(
+      state.players,
+      state.drawerIndex,
+      state.inactivePlayerIds ?? []
+    );
 
     const updatedState: GameState = {
       ...state,
@@ -225,6 +251,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentCardId: adaptiveCardId,
       currentSelection: { selectedPlayerIds: [] },
       cardsDrawnCount: state.cardsDrawnCount + 1,
+      activeFollowUpCardId: null,
       decks: {
         ...state.decks,
         [currentLevel]: {
@@ -298,6 +325,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentSelection: { selectedPlayerIds: [] },
       cardsDrawnCount: state.cardsDrawnCount + 1,
       skippedCardIds: updatedSkipped,
+      activeFollowUpCardId: null,
       decks: {
         ...state.decks,
         [currentLevel]: {
@@ -361,7 +389,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const isInitialDeal = state.cardsDrawnCount === 0;
     const nextDrawerIndex = isInitialDeal
       ? state.drawerIndex
-      : (state.drawerIndex + 1) % state.players.length;
+      : getNextEligibleDrawerIndex(
+          state.players,
+          state.drawerIndex,
+          state.inactivePlayerIds ?? []
+        );
 
     const updatedState: GameState = {
       ...state,
@@ -370,6 +402,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentCardId: nextCardId,
       currentSelection: { selectedPlayerIds: [] },
       cardsDrawnCount: nextCardId ? state.cardsDrawnCount + 1 : state.cardsDrawnCount,
+      activeFollowUpCardId: null,
       decks: {
         ...state.decks,
         [level]: {
@@ -390,14 +423,67 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
-  recordFollowUpOpened: (cardId: string) => {
-    const state = get().gameState;
-    if (!state) return;
-    const current = state.followUpOpenedCardIds || [];
-    if (current.includes(cardId)) return;
+  openFollowUp: () => {
+    const game = get().gameState;
+    if (!game || !game.currentCardId) return;
+    get().recordFollowUpOpened(game.currentCardId);
+  },
+
+  closeFollowUp: () => {
+    const game = get().gameState;
+    if (!game) return;
     const updatedState: GameState = {
-      ...state,
-      followUpOpenedCardIds: [...current, cardId],
+      ...game,
+      activeFollowUpCardId: null,
+    };
+    saveGameState(updatedState);
+    set({ gameState: updatedState });
+  },
+
+  recordFollowUpOpened: (cardId?: string) => {
+    const game = get().gameState;
+    if (!game) return;
+    const targetCardId = cardId || game.currentCardId;
+    if (!targetCardId) return;
+
+    const current = game.followUpOpenedCardIds || [];
+    const opened = current.includes(targetCardId) ? current : [...current, targetCardId];
+
+    const updatedState: GameState = {
+      ...game,
+      followUpOpenedCardIds: opened,
+      activeFollowUpCardId: targetCardId,
+    };
+    saveGameState(updatedState);
+    set({ gameState: updatedState });
+  },
+
+  setPlayerAvailability: (playerId: string, available: boolean) => {
+    const game = get().gameState;
+    if (!game) return;
+
+    const inactive = new Set(game.inactivePlayerIds ?? []);
+    if (available) {
+      inactive.delete(playerId);
+    } else {
+      inactive.add(playerId);
+    }
+
+    let nextDrawerIndex = game.drawerIndex;
+    const currentDrawer = game.players[game.drawerIndex];
+
+    if (!available && currentDrawer?.id === playerId) {
+      nextDrawerIndex = getNextEligibleDrawerIndex(
+        game.players,
+        game.drawerIndex,
+        [...inactive]
+      );
+    }
+
+    const updatedState: GameState = {
+      ...game,
+      inactivePlayerIds: [...inactive],
+      drawerIndex: nextDrawerIndex,
     };
     saveGameState(updatedState);
     set({ gameState: updatedState });

@@ -16,6 +16,7 @@ import {
   handleHostIncomingMessage,
   handleGuestIncomingMessage,
 } from './multiplayer/messageHandlers';
+import { getConsentEligiblePlayerIds, reconcileThreeStarConsent } from './multiplayer/consent';
 
 export interface MultiplayerStore {
   isOnlineMode: boolean;
@@ -126,7 +127,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
 
         conn.on('close', () => {
           peerManager.getHostConnections().delete(conn.peer);
-          // Only remove players if game hasn't started yet; during active game, preserve slot for reconnection
+          // If game hasn't started yet, cleanly remove from lobby
           if (!get().isGameStarted) {
             const remaining = get().players.filter((p) => p.peerId !== conn.peer);
             set({ players: remaining });
@@ -135,6 +136,53 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
               senderId: hostPlayerId,
               payload: { players: remaining },
             });
+          } else {
+            // Active game: mark player disconnected, start 30s grace period, update gameStore availability and consent
+            const disconnectedPlayer = get().players.find((p) => p.peerId === conn.peer);
+            if (disconnectedPlayer) {
+              const updatedPlayers = get().players.map((p) =>
+                p.id === disconnectedPlayer.id
+                  ? {
+                      ...p,
+                      peerId: null,
+                      connectionStatus: 'disconnected' as const,
+                      disconnectedAt: Date.now(),
+                    }
+                  : p
+              );
+              set({ players: updatedPlayers });
+
+              // Update game availability (advances drawer if current drawer was disconnected)
+              useGameStore.getState().setPlayerAvailability(disconnectedPlayer.id, false);
+
+              // Reconcile three-star consent if pending
+              const activePlayerIds = getConsentEligiblePlayerIds(updatedPlayers);
+              const reconciledConsent = reconcileThreeStarConsent(
+                get().threeStarConsent,
+                activePlayerIds
+              );
+              if (reconciledConsent?.status === 'accepted') {
+                useGameStore.getState().confirmThreeStarConsent();
+                set({ threeStarConsent: null });
+              } else {
+                set({ threeStarConsent: reconciledConsent });
+              }
+
+              // Broadcast update
+              peerManager.broadcastToGuests({
+                type: 'PLAYER_LIST_UPDATE',
+                senderId: hostPlayerId,
+                payload: { players: updatedPlayers },
+              });
+              get().broadcastState();
+
+              // Start 30s disconnect grace period
+              peerManager.startDisconnectGrace(disconnectedPlayer.id, () => {
+                console.log(
+                  `[Multiplayer Host] Disconnect grace expired for player: ${disconnectedPlayer.name} (${disconnectedPlayer.id})`
+                );
+              }, 30000);
+            }
           }
         });
       });

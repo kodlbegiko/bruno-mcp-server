@@ -88,6 +88,7 @@ describe('Wave 4 Optimizations Suite (Dark Mode, Web Share & Prefetching)', () =
             'three-star': { shuffledIds: ['three_01'], cursor: 1, usedIds: [] },
           },
           historyCardIds: ['ice_01', 'one_01', 'two_01', 'three_01'],
+          activeFollowUpCardId: null,
         },
       });
     });

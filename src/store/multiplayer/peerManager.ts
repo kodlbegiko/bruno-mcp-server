@@ -39,6 +39,30 @@ export class PeerConnectionManager {
     return this.isManualLeave;
   }
 
+  private disconnectGraceTimers = new Map<string, any>();
+
+  startDisconnectGrace(playerId: string, onExpire: () => void, durationMs = 30000): void {
+    this.clearDisconnectGrace(playerId);
+    const timer = setTimeout(() => {
+      this.disconnectGraceTimers.delete(playerId);
+      onExpire();
+    }, durationMs);
+    this.disconnectGraceTimers.set(playerId, timer);
+  }
+
+  clearDisconnectGrace(playerId: string): void {
+    const timer = this.disconnectGraceTimers.get(playerId);
+    if (timer) {
+      clearTimeout(timer);
+      this.disconnectGraceTimers.delete(playerId);
+    }
+  }
+
+  clearAllDisconnectGrace(): void {
+    this.disconnectGraceTimers.forEach((timer) => clearTimeout(timer));
+    this.disconnectGraceTimers.clear();
+  }
+
   clearReconnectTimer() {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
@@ -134,6 +158,7 @@ export class PeerConnectionManager {
    */
   cleanup(): void {
     this.clearReconnectTimer();
+    this.clearAllDisconnectGrace();
     this.stopHeartbeat();
 
     if (this.guestConnectionToHost) {
