@@ -98,6 +98,11 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     return () => clearInterval(checkTimer);
   }, [gameState?.startedAt, gameState?.sessionGoalMinutes]);
 
+  // Zero-latency prefetching: Warm up card back assets in background
+  useEffect(() => {
+    prefetchCardAssets();
+  }, []);
+
   if (!gameState) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">
@@ -117,11 +122,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   const currentDeck = gameState.decks[currentLevel];
   const isDeckEmpty = !currentCard;
   const cardsDrawnInLevel = countEngagedCardsInLevel(gameState, currentLevel);
-
-  // Zero-latency prefetching: Warm up card back assets in background
-  useEffect(() => {
-    prefetchCardAssets();
-  }, []);
 
   const interactionInfo = currentCard
     ? resolveInteraction(currentCard, drawer, gameState.players, selectedPlayerIds)

@@ -131,6 +131,22 @@ export function executeHostAction(
     case 'REMOVE_PLAYER': {
       const targetId = actionPayload.targetPlayerId || actionPayload.playerId;
       if (targetId) {
+        const removedPlayer = mp.players.find((p) => p.id === targetId);
+        if (removedPlayer?.peerId) {
+          const conn = peerManager.getHostConnections().get(removedPlayer.peerId);
+          if (conn) {
+            try {
+              conn.send({
+                type: 'ROOM_CLOSED',
+                senderId: mp.myPlayerId || 'host',
+                payload: { reason: '你已被移出房間。' },
+              });
+              setTimeout(() => conn.close(), 300);
+            } catch {}
+            peerManager.getHostConnections().delete(removedPlayer.peerId);
+          }
+        }
+
         const remaining = mp.players.filter((p) => p.id !== targetId);
         useMultiplayerStore.setState({ players: remaining });
         peerManager.clearDisconnectGrace(targetId);
@@ -148,7 +164,10 @@ export function executeHostAction(
         peerManager.broadcastToGuests({
           type: 'PLAYER_LIST_UPDATE',
           senderId: mp.myPlayerId || 'host',
-          payload: { players: remaining },
+          payload: {
+            players: remaining,
+            roomConfig: useMultiplayerStore.getState().roomConfig || undefined,
+          },
         });
       }
       break;
@@ -162,6 +181,7 @@ export function executeHostAction(
         senderId: mp.myPlayerId || 'host',
       });
       game.resetGame();
+      useMultiplayerStore.setState({ isGameStarted: false });
       break;
     default:
       console.warn('[executeHostAction] Unhandled action:', (actionPayload as any).action);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GAME_STORAGE_KEY } from '../../game/persistence';
 
 export const PwaInstallPrompt: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -58,12 +59,12 @@ export const PwaInstallPrompt: React.FC = () => {
   const hasExperiencedGame = (() => {
     try {
       if (typeof window === 'undefined') return false;
-      const raw = localStorage.getItem('deeply-know-game:v1');
+      const raw = localStorage.getItem(GAME_STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         return (
           parsed?.status === 'ended' ||
-          (parsed?.revealedCardIds?.length || 0) >= 4 ||
+          (parsed?.revealedCardIds?.length || 0) >= 5 ||
           (parsed?.cardsDrawnCount || 0) >= 5
         );
       }

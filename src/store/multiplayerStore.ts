@@ -7,6 +7,7 @@ import {
   ClientActionPayload,
   SyncStatePayload,
   ThreeStarConsentState,
+  RoomConfig,
 } from '../types/multiplayer';
 import { PEER_CONFIG, generateRoomCode, formatPeerId } from '../game/multiplayer/peerConfig';
 import { useGameStore } from './gameStore';
@@ -26,6 +27,7 @@ export interface MultiplayerStore {
   myPlayerId: string | null;
   myPlayerName: string;
   players: OnlinePlayer[];
+  roomConfig: RoomConfig | null;
   connectionStatus: 'disconnected' | 'connecting' | 'connected' | 'error';
   errorMessage: string | null;
   isReconnecting: boolean;
@@ -41,6 +43,7 @@ export interface MultiplayerStore {
   leaveRoom: () => void;
   clearError: () => void;
   setThreeStarConsent: (consent: ThreeStarConsentState | null) => void;
+  setRoomConfig: (config: RoomConfig) => void;
 }
 
 const MAX_RECONNECT_ATTEMPTS = 3;
@@ -53,6 +56,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
   myPlayerId: null,
   myPlayerName: '',
   players: [],
+  roomConfig: null,
   connectionStatus: 'disconnected',
   errorMessage: null,
   isReconnecting: false,
@@ -60,6 +64,19 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
   reconnectToken: null,
   threeStarConsent: null,
   setThreeStarConsent: (consent) => set({ threeStarConsent: consent }),
+  setRoomConfig: (roomConfig: RoomConfig) => {
+    set({ roomConfig });
+    if (get().role === 'host') {
+      peerManager.broadcastToGuests({
+        type: 'PLAYER_LIST_UPDATE',
+        senderId: get().myPlayerId || 'host',
+        payload: {
+          players: get().players,
+          roomConfig,
+        },
+      });
+    }
+  },
 
   createRoom: async (hostName: string) => {
     get().leaveRoom();
@@ -85,6 +102,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
       roomCode,
       myPlayerId: hostPlayerId,
       myPlayerName: name,
+      roomConfig: null,
       connectionStatus: 'connecting',
       errorMessage: null,
       isReconnecting: false,
@@ -416,6 +434,7 @@ export const useMultiplayerStore = create<MultiplayerStore>((set, get) => ({
       myPlayerId: null,
       reconnectToken: null,
       players: [],
+      roomConfig: null,
       connectionStatus: 'disconnected',
       errorMessage: null,
       isReconnecting: false,

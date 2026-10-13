@@ -14,12 +14,12 @@ const CLOSING_PROMPTS = [
     en: 'What is one new thing you learned about each other today?',
   },
   {
-    zh: '有哪一句話，是你想從今晚帶走的？',
-    en: 'What is one phrase or feeling you want to take away from tonight?',
+    zh: '有哪一句話，是你想從這場對話帶走的？',
+    en: 'What is one phrase or feeling you want to take away from this conversation?',
   },
   {
-    zh: '用一句話，謝謝今晚願意坦誠分享的彼此。',
-    en: 'In one sentence, thank each other for being open and present.',
+    zh: '用一句話，謝謝這場對話願意坦誠分享的彼此。',
+    en: 'In one sentence, thank each other for being open and present in this conversation.',
   },
   {
     zh: '安靜想十秒，再輪流說一句最想從這場對話帶走的話。',

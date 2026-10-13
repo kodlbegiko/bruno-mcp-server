@@ -69,7 +69,10 @@ export function handleHostIncomingMessage(
 
       const guestName = message.payload?.playerName || '旅人';
       const guestPlayerId = `player_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-      const reconnectToken = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      const reconnectToken =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
 
       const newPlayer: OnlinePlayer = {
         id: guestPlayerId,
@@ -91,6 +94,7 @@ export function handleHostIncomingMessage(
           reconnectToken,
           roomCode: ctx.roomCode,
           players: updatedPlayers,
+          roomConfig: useMultiplayerStore.getState().roomConfig || undefined,
           gameState: ctx.isGameStarted ? useGameStore.getState().gameState : null,
           isCardFlipped: useGameStore.getState().isCardFlipped,
           selectedPlayerIds: useGameStore.getState().selectedPlayerIds,
@@ -102,7 +106,10 @@ export function handleHostIncomingMessage(
       peerManager.broadcastToGuests({
         type: 'PLAYER_LIST_UPDATE',
         senderId: ctx.myPlayerId || 'host',
-        payload: { players: updatedPlayers },
+        payload: {
+          players: updatedPlayers,
+          roomConfig: useMultiplayerStore.getState().roomConfig || undefined,
+        },
       });
       break;
     }
@@ -164,6 +171,7 @@ export function handleHostIncomingMessage(
           reconnectToken: existingPlayer.reconnectToken,
           roomCode: ctx.roomCode,
           players: updatedPlayers,
+          roomConfig: useMultiplayerStore.getState().roomConfig || undefined,
           gameState: ctx.isGameStarted ? useGameStore.getState().gameState : null,
           isCardFlipped: useGameStore.getState().isCardFlipped,
           selectedPlayerIds: useGameStore.getState().selectedPlayerIds,
@@ -175,7 +183,10 @@ export function handleHostIncomingMessage(
       peerManager.broadcastToGuests({
         type: 'PLAYER_LIST_UPDATE',
         senderId: ctx.myPlayerId || 'host',
-        payload: { players: updatedPlayers },
+        payload: {
+          players: updatedPlayers,
+          roomConfig: useMultiplayerStore.getState().roomConfig || undefined,
+        },
       });
       ctx.broadcastState();
       break;
@@ -326,6 +337,10 @@ export function handleGuestIncomingMessage(
         useMultiplayerStore.setState({ threeStarConsent: threeStarConsent ?? null });
       }
 
+      if (message.payload.roomConfig) {
+        useMultiplayerStore.setState({ roomConfig: message.payload.roomConfig });
+      }
+
       if (gameState) {
         if (gameState.status === 'playing') {
           useMultiplayerStore.setState({ isGameStarted: true });
@@ -343,6 +358,9 @@ export function handleGuestIncomingMessage(
 
     case 'PLAYER_LIST_UPDATE': {
       ctx.updateGuestState({ players: message.payload.players });
+      if (message.payload.roomConfig) {
+        useMultiplayerStore.setState({ roomConfig: message.payload.roomConfig });
+      }
       break;
     }
 
@@ -384,6 +402,7 @@ export function handleGuestIncomingMessage(
 
     case 'SESSION_RESET': {
       useGameStore.getState().resetGame();
+      useMultiplayerStore.setState({ isGameStarted: false });
       ctx.updateGuestState({
         connectionStatus: 'connected',
         errorMessage: '房主已重設本局遊戲。',

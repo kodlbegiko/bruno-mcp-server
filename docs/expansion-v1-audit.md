@@ -14,7 +14,7 @@
 | **一星 (One-Star)** | 15 | single (6), pair (3), othersToDrawer (2), discussion (2), all (1), chooseOne (1) | reflective (7), warm (6), light (2) | memories, values, growth, relationships |
 | **二星 (Two-Star)** | 15 | single (5), pair (3), discussion (3), othersToDrawer (2), all (1), chooseOne (1) | reflective (12), warm (3) | trust, boundaries, conflict, authenticity |
 | **三星 (Three-Star)** | 15 | single (6), discussion (3), othersToDrawer (3), pair (2), chooseOne (1) | vulnerable (7), warm (4), reflective (4) | repair, belonging, meaning, future |
-| **總計** | **60** | **單人 22 / 雙人與群體互動 38** | **光譜平衡完整（溫暖／沉澱／微脆弱交錯）** | **19 個主題維度覆蓋** |
+| **總計** | **60** | **單人 22 / 雙人與群體互動 38** | **光譜平衡完整（溫暖／沉澱／微脆弱交錯）** | **與完整題庫共同覆蓋 19 個主題維度** |
 
 ---
 

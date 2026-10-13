@@ -19,6 +19,8 @@ export const WaitingRoom: React.FC<WaitingRoomProps> = ({
   const roomCode = useMultiplayerStore((s) => s.roomCode);
   const myPlayerId = useMultiplayerStore((s) => s.myPlayerId);
   const players = useMultiplayerStore((s) => s.players);
+  const roomConfig = useMultiplayerStore((s) => s.roomConfig);
+  const sendAction = useMultiplayerStore((s) => s.sendAction);
 
   const connectionStatus = useMultiplayerStore((s) => s.connectionStatus);
 
@@ -27,6 +29,7 @@ export const WaitingRoom: React.FC<WaitingRoomProps> = ({
 
   const isHost = role === 'host';
   const canStart = isHost && players.length >= 2;
+  const activeQuestionSetId = roomConfig?.questionSetId || questionSetId || 'full';
 
   const handleCopyCode = () => {
     if (roomCode) {
@@ -89,14 +92,19 @@ export const WaitingRoom: React.FC<WaitingRoomProps> = ({
         </div>
 
         {/* Selected Question Set info */}
-        <div className="flex justify-center -mt-2">
+        <div className="flex flex-wrap items-center justify-center gap-2 -mt-2">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-100/90 dark:bg-stone-800/90 border border-paper-border dark:border-stone-700 text-xs font-serif text-ink-700 dark:text-stone-300 shadow-2xs">
             <span>🎴</span>
             <span>
-              題庫：{QUESTION_SETS[questionSetId]?.nameZh || '完整版'}（
-              {getQuestionSetTotalCount(questionSetId)} 題）
+              題庫：{QUESTION_SETS[activeQuestionSetId]?.nameZh || '完整版'}（
+              {getQuestionSetTotalCount(activeQuestionSetId)} 題）
             </span>
           </span>
+          {roomConfig?.mode && (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-paper-100/90 dark:bg-stone-800/90 border border-paper-border dark:border-stone-700 text-[11px] font-sans text-ink-600 dark:text-stone-400">
+              {roomConfig.mode === 'guided' ? '深度旅程' : '自由抽牌'}
+            </span>
+          )}
         </div>
 
         {/* Players Waiting List */}
@@ -135,6 +143,16 @@ export const WaitingRoom: React.FC<WaitingRoomProps> = ({
                       <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-paper-200 dark:bg-stone-700 text-ink-700 dark:text-stone-300">
                         你
                       </span>
+                    )}
+                    {isHost && !p.isHost && (
+                      <button
+                        type="button"
+                        onClick={() => sendAction({ action: 'REMOVE_PLAYER', playerId: p.id })}
+                        className="text-[11px] font-sans px-2 py-0.5 rounded-md text-rose-700 dark:text-rose-400 hover:bg-rose-100/70 dark:hover:bg-rose-950/70 border border-rose-200/50 dark:border-rose-900/50 transition-colors ml-1"
+                        title="移出房間"
+                      >
+                        移除
+                      </button>
                     )}
                   </div>
                 </div>

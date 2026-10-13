@@ -50,6 +50,7 @@ export const App: React.FC = () => {
   const isReconnecting = useMultiplayerStore((s) => s.isReconnecting);
   const reconnect = useMultiplayerStore((s) => s.reconnect);
   const multiplayerRole = useMultiplayerStore((s) => s.role);
+  const isGameStarted = useMultiplayerStore((s) => s.isGameStarted);
 
   const [currentRoute, setCurrentRoute] = useState<AppRoute>('home');
   const [initialRoomCode, setInitialRoomCode] = useState<string | null>(null);
@@ -75,14 +76,19 @@ export const App: React.FC = () => {
 
   // For Guest players: Auto-transition between waiting room, game board, and ending screen
   useEffect(() => {
-    if (isOnlineMode && gameState) {
-      if (gameState.status === 'playing' && currentRoute === 'online-waiting') {
-        setCurrentRoute('game');
-      } else if (gameState.status === 'ended' && currentRoute === 'game') {
-        setCurrentRoute('ending');
+    if (isOnlineMode) {
+      if (gameState) {
+        if (gameState.status === 'playing' && currentRoute === 'online-waiting') {
+          setCurrentRoute('game');
+        } else if (gameState.status === 'ended' && currentRoute === 'game') {
+          setCurrentRoute('ending');
+        }
+      } else if (!isGameStarted && currentRoute === 'game') {
+        // Game state was reset or cleared while in game: return to waiting room if connected, else home
+        setCurrentRoute(connectionStatus === 'connected' ? 'online-waiting' : 'home');
       }
     }
-  }, [isOnlineMode, gameState, currentRoute]);
+  }, [isOnlineMode, gameState, currentRoute, isGameStarted, connectionStatus]);
 
   const handleResumeGame = () => {
     const success = resumeGame();
@@ -124,6 +130,13 @@ export const App: React.FC = () => {
     if (startingLevel) setHostStartingLevel(startingLevel);
     setHostQuestionSetId(questionSetId);
     setHostTargetRelationship(targetRelationship);
+    useMultiplayerStore.getState().setRoomConfig({
+      questionSetId,
+      mode,
+      startingLevel,
+      sessionGoal,
+      targetRelationship,
+    });
     setCurrentRoute('online-waiting');
   };
 

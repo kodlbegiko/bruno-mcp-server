@@ -336,4 +336,88 @@ describe('V2.2 Architectural Refinements Suite', () => {
       expect(errors.some((e) => e.includes('Invalid intensity'))).toBe(true);
     });
   });
+
+  describe('7. RC Edge Cases & Blocker Verifications', () => {
+    it('skipCard on last remaining card records skippedCardIds and clears follow-up and selections', () => {
+      useGameStore.getState().initGame(
+        [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }],
+        'free',
+        null
+      );
+
+      const state = useGameStore.getState().gameState!;
+      const currentLevel = state.currentLevel;
+      const cardToSkip = state.currentCardId!;
+
+      // Setup: cursor has reached the end of shuffledIds so remainingIds is empty
+      const deck = state.decks[currentLevel];
+
+      useGameStore.setState({
+        gameState: {
+          ...state,
+          decks: {
+            ...state.decks,
+            [currentLevel]: {
+              ...deck,
+              cursor: deck.shuffledIds.length,
+            },
+          },
+          activeFollowUpCardId: cardToSkip,
+          currentSelection: { selectedPlayerIds: ['p2'] },
+        },
+        selectedPlayerIds: ['p2'],
+        isCardFlipped: true,
+      });
+
+      // Execute skip on the last remaining card
+      useGameStore.getState().skipCard();
+
+      const afterState = useGameStore.getState().gameState!;
+      expect(afterState.currentCardId).toBeNull();
+      expect(afterState.skippedCardIds).toContain(cardToSkip);
+      expect(afterState.activeFollowUpCardId).toBeNull();
+      expect(afterState.currentSelection?.selectedPlayerIds).toEqual([]);
+      expect(useGameStore.getState().isCardFlipped).toBe(false);
+      expect(useGameStore.getState().selectedPlayerIds).toEqual([]);
+    });
+
+    it('removePlayer preserves the drawer identity when a non-drawer is removed', () => {
+      useGameStore.getState().initGame(
+        [
+          { id: 'p1', name: 'Alice' },
+          { id: 'p2', name: 'Bob' },
+          { id: 'p3', name: 'Charlie' },
+        ],
+        'free',
+        null
+      );
+
+      // Advance drawer to Bob (index 1)
+      useGameStore.setState({
+        gameState: {
+          ...useGameStore.getState().gameState!,
+          drawerIndex: 1, // Bob is current drawer
+        },
+      });
+
+      expect(useGameStore.getState().gameState?.players[1].id).toBe('p2');
+
+      // Remove Charlie (index 2, a non-drawer)
+      useGameStore.getState().removePlayer('p3');
+
+      let afterState = useGameStore.getState().gameState!;
+      expect(afterState.players.map((p) => p.id)).toEqual(['p1', 'p2']);
+      // Current drawer must STILL be Bob!
+      expect(afterState.players[afterState.drawerIndex].id).toBe('p2');
+      expect(afterState.drawerIndex).toBe(1);
+
+      // Now remove Alice (index 0, also a non-drawer)
+      useGameStore.getState().removePlayer('p1');
+      afterState = useGameStore.getState().gameState!;
+      expect(afterState.players.map((p) => p.id)).toEqual(['p2']);
+      // Current drawer must STILL be Bob (now at index 0)!
+      expect(afterState.players[afterState.drawerIndex].id).toBe('p2');
+      expect(afterState.drawerIndex).toBe(0);
+    });
+  });
 });

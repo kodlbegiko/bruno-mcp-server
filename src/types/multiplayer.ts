@@ -1,7 +1,17 @@
-import { GameState } from './game';
+import { GameState, GameMode, SessionGoalMinutes } from './game';
 import { CardLevel } from './card';
+import { QuestionSetId } from '../domain/questions/questionSets';
+import { RelationshipTag } from '../data/cards/types';
 
 export type MultiplayerRole = 'host' | 'guest';
+
+export interface RoomConfig {
+  questionSetId: QuestionSetId;
+  mode?: GameMode;
+  startingLevel?: CardLevel;
+  sessionGoal?: SessionGoalMinutes;
+  targetRelationship?: RelationshipTag;
+}
 
 export interface OnlinePlayer {
   id: string;
@@ -80,11 +90,17 @@ export interface JoinAcceptedPayload {
   reconnectToken?: string;
   roomCode: string;
   players: OnlinePlayer[];
+  roomConfig?: RoomConfig;
   gameState?: GameState | null;
   isCardFlipped?: boolean;
   selectedPlayerIds?: string[];
   showThreeStarConsent?: boolean;
   threeStarConsent?: ThreeStarConsentState | null;
+}
+
+export interface PlayerListUpdatePayload {
+  players: OnlinePlayer[];
+  roomConfig?: RoomConfig;
 }
 
 export interface SyncStatePayload {

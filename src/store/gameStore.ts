@@ -280,11 +280,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const nextCursor = deck.cursor;
     const remainingIds = deck.shuffledIds.slice(nextCursor);
 
+    const skippedCardId = state.currentCardId;
+    const updatedSkipped = skippedCardId
+      ? (state.skippedCardIds?.includes(skippedCardId)
+          ? state.skippedCardIds
+          : [...(state.skippedCardIds || []), skippedCardId])
+      : state.skippedCardIds || [];
+
     if (remainingIds.length === 0) {
-      // Deck is empty
+      // Deck is empty - current card was skipped and there is no replacement
       const updatedState: GameState = {
         ...state,
         currentCardId: null,
+        skippedCardIds: updatedSkipped,
+        activeFollowUpCardId: null,
+        currentSelection: { selectedPlayerIds: [] },
       };
       saveGameState(updatedState);
       set({
@@ -294,11 +304,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
       return;
     }
-
-    const skippedCardId = state.currentCardId;
-    const updatedSkipped = skippedCardId
-      ? [...(state.skippedCardIds || []), skippedCardId]
-      : state.skippedCardIds || [];
 
     const adaptiveCardId =
       selectNextAdaptiveCard(remainingIds, {
@@ -510,11 +515,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (remainingPlayers.length === 0) return;
 
     const inactive = (game.inactivePlayerIds ?? []).filter((id) => id !== playerId);
-    let nextDrawerIndex = game.drawerIndex;
-    if (nextDrawerIndex >= remainingPlayers.length) {
-      nextDrawerIndex = 0;
+    const currentDrawer = game.players[game.drawerIndex];
+    const isRemovingCurrentDrawer = currentDrawer && currentDrawer.id === playerId;
+
+    let nextDrawerIndex: number;
+    if (isRemovingCurrentDrawer) {
+      // The current drawer was removed; advance to next eligible drawer
+      const baseIndex = game.drawerIndex >= remainingPlayers.length ? 0 : game.drawerIndex;
+      const inactiveSet = new Set(inactive);
+      if (remainingPlayers[baseIndex] && !inactiveSet.has(remainingPlayers[baseIndex].id)) {
+        nextDrawerIndex = baseIndex;
+      } else {
+        nextDrawerIndex = getNextEligibleDrawerIndex(remainingPlayers, baseIndex, inactive);
+      }
+    } else {
+      // The removed player was NOT the drawer; keep current drawer's turn!
+      const newDrawerIdx = remainingPlayers.findIndex((p) => p.id === currentDrawer?.id);
+      nextDrawerIndex = newDrawerIdx !== -1 ? newDrawerIdx : 0;
     }
-    nextDrawerIndex = getNextEligibleDrawerIndex(remainingPlayers, nextDrawerIndex, inactive);
 
     const updatedSelection = {
       selectedPlayerIds: (game.currentSelection?.selectedPlayerIds || []).filter(

@@ -38,6 +38,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   const isOnlineMode = useMultiplayerStore((s) => s.isOnlineMode);
   const role = useMultiplayerStore((s) => s.role);
   const isHost = !isOnlineMode || role === 'host';
+  const onlinePlayers = useMultiplayerStore((s) => s.players);
   const sendAction = useMultiplayerStore((s) => s.sendAction);
 
   const [activeTab, setActiveTab] = useState<'decks' | 'history' | 'settings'>('decks');
@@ -390,20 +391,68 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                     <h3 className="text-xs font-semibold text-ink-500 dark:text-stone-400 uppercase tracking-wider">
                       參與玩家 ({gameState.players.length} 人)
                     </h3>
-                    <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-paper-100/50 dark:bg-stone-800/50 border border-paper-border dark:border-stone-700">
-                      {gameState.players.map((p, idx) => (
-                        <span
-                          key={p.id}
-                          className={`text-xs px-2.5 py-1 rounded-full border ${
-                            idx === gameState.drawerIndex
-                              ? 'bg-ink-900 text-paper-50 border-ink-900 dark:bg-stone-100 dark:text-stone-900 font-medium'
-                              : 'bg-paper-50 dark:bg-stone-900 text-ink-700 dark:text-stone-300 border-paper-border dark:border-stone-700'
-                          }`}
-                        >
-                          {p.name} {idx === gameState.drawerIndex ? ' (當前抽牌)' : ''}
-                        </span>
-                      ))}
-                    </div>
+                    {isOnlineMode ? (
+                      <div className="space-y-1.5 p-2 rounded-xl bg-paper-100/50 dark:bg-stone-800/50 border border-paper-border dark:border-stone-700">
+                        {gameState.players.map((p, idx) => {
+                          const isCurrentDrawer = idx === gameState.drawerIndex;
+                          const onlineInfo = onlinePlayers.find((op) => op.id === p.id);
+                          const isDisconnected = onlineInfo?.connectionStatus === 'disconnected';
+                          const isGraceExpired = Boolean(onlineInfo?.graceExpired);
+
+                          return (
+                            <div
+                              key={p.id}
+                              className={`flex items-center justify-between p-2 rounded-lg border text-xs ${
+                                isCurrentDrawer
+                                  ? 'bg-paper-50 dark:bg-stone-900 border-ink-900/30 dark:border-stone-500 font-medium'
+                                  : 'bg-paper-50/60 dark:bg-stone-850/60 border-paper-border dark:border-stone-700'
+                              }`}
+                            >
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-ink-900 dark:text-stone-100 truncate">
+                                  {p.name}
+                                </span>
+                                {isCurrentDrawer && (
+                                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-ink-900 text-paper-50 dark:bg-stone-100 dark:text-stone-900 shrink-0 font-sans">
+                                    當前抽牌
+                                  </span>
+                                )}
+                                {isDisconnected && (
+                                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shrink-0 font-sans">
+                                    {isGraceExpired ? '斷線逾時' : '暫時離線'}
+                                  </span>
+                                )}
+                              </div>
+
+                              {isHost && isGraceExpired && !onlineInfo?.isHost && (
+                                <button
+                                  type="button"
+                                  onClick={() => sendAction({ action: 'REMOVE_PLAYER', playerId: p.id })}
+                                  className="text-[11px] px-2 py-0.5 rounded text-rose-700 dark:text-rose-400 hover:bg-rose-100/70 dark:hover:bg-rose-950/70 border border-rose-200/50 dark:border-rose-900/50 font-sans transition-colors shrink-0"
+                                >
+                                  移除此玩家
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-paper-100/50 dark:bg-stone-800/50 border border-paper-border dark:border-stone-700">
+                        {gameState.players.map((p, idx) => (
+                          <span
+                            key={p.id}
+                            className={`text-xs px-2.5 py-1 rounded-full border ${
+                              idx === gameState.drawerIndex
+                                ? 'bg-ink-900 text-paper-50 border-ink-900 dark:bg-stone-100 dark:text-stone-900 font-medium'
+                                : 'bg-paper-50 dark:bg-stone-900 text-ink-700 dark:text-stone-300 border-paper-border dark:border-stone-700'
+                            }`}
+                          >
+                            {p.name} {idx === gameState.drawerIndex ? ' (當前抽牌)' : ''}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Actions */}
