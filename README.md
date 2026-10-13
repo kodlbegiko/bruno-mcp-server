@@ -11,7 +11,7 @@
 
 1. **題目內容嚴謹審查**：
    - **經典版 (70 題)**：嚴格對照官方實體卡牌原稿素材（10 暖身 + 20 一星 + 20 二星 + 20 三星，0 張私自加減、0 改寫）。
-   - **深度擴充版 Expansion V1 (60 題)**：15 暖身 + 15 一星 + 15 二星 + 15 三星，全數通過 Content Review Workflow（`reviewStatus: 'approved'`），並附帶專屬「深入追問」（Follow-Up）引導。
+   - **深度擴充版 Expansion V1 (60 題)**：15 暖身 + 15 一星 + 15 二星 + 15 三星，全數通過 Content Review Workflow（`reviewStatus: 'approved'`），並於精選深度題加入專屬深入追問引導。
    - **完整題庫 (130 題)**：無縫融合經典與擴充，支援自訂模式任意選擇題庫。
 2. **面對面互動不被手機打斷**：手機是「牌盒＋主持人」，翻牌後注意力回到彼此對視與聆聽，絕不要求「每人回答後按完成」。
 3. **心理安全感與對話節奏引導 (Adaptive Conversation Engine)**：
@@ -85,7 +85,7 @@
 - **音效合成**：Web Audio API 原生物理音效合成（免載入任何 mp3）
 - **觸覺回饋**：Navigator Vibration API
 - **測試體系**：
-  - **Vitest**：120+ 項自動化測試（題庫完整性、Review Workflow 門禁、智慧節奏演算法、洗牌隨機度、角色指派、Zustand 切片、WebRTC 心跳、深色模式、手勢等）
+  - **Vitest**：115+ 項單元與整合測試（題庫完整性、Review Workflow 門禁、智慧節奏演算法、洗牌隨機度、角色指派、Zustand 切片、WebRTC 心跳、深色模式、手勢等）
   - **Playwright**：16 項端到端跨裝置自動化測試（涵蓋 Mobile iPhone 14 與 Desktop Chrome 全流程）
 
 ---

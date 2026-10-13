@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Share2, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../store/gameStore';
+import { useMultiplayerStore } from '../store/multiplayerStore';
 import { LEVEL_NAMES } from '../game/progression';
 import { getHighestRevealedLevel } from '../domain/game/endingStats';
 import { Button } from '../components/ui/Button';
@@ -36,7 +37,9 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
   const { t, i18n } = useTranslation();
   const [copied, setCopied] = useState(false);
   const gameState = useGameStore((s) => s.gameState);
-  const resetGame = useGameStore((s) => s.resetGame);
+  const isOnlineMode = useMultiplayerStore((s) => s.isOnlineMode);
+  const role = useMultiplayerStore((s) => s.role);
+  const isHost = !isOnlineMode || role === 'host';
   const [promptIndex] = useState(() => Math.floor(Math.random() * CLOSING_PROMPTS.length));
   const closingPrompt = CLOSING_PROMPTS[promptIndex];
 
@@ -68,12 +71,10 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
 
   const handlePlayAgain = () => {
     trackEvent('play_again');
-    resetGame();
     onPlayAgain();
   };
 
   const handleHome = () => {
-    resetGame();
     onBackToHome();
   };
 
@@ -258,15 +259,24 @@ export const Ending: React.FC<EndingProps> = ({ onPlayAgain, onBackToHome }) => 
           <span>{copied ? t('ending.copied') : t('ending.share_button')}</span>
         </Button>
 
-        <Button
-          variant="primary"
-          size="lg"
-          fullWidth
-          onClick={handlePlayAgain}
-          className="shadow-md"
-        >
-          {t('ending.play_again')}
-        </Button>
+        {isHost ? (
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onClick={handlePlayAgain}
+            className="shadow-md"
+          >
+            {t('ending.play_again')}
+          </Button>
+        ) : (
+          <div className="py-3 px-4 rounded-xl bg-paper-100/70 dark:bg-stone-800/70 border border-paper-border dark:border-stone-700 text-center flex items-center justify-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs sm:text-sm font-serif text-ink-700 dark:text-stone-300">
+              等待房主開始下一局...
+            </span>
+          </div>
+        )}
 
         <Button
           variant="ghost"

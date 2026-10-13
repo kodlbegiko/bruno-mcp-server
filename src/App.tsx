@@ -40,12 +40,14 @@ export const App: React.FC = () => {
   const gameState = useGameStore((s) => s.gameState);
   const resumeGame = useGameStore((s) => s.resumeGame);
   const initGame = useGameStore((s) => s.initGame);
+  const resetGame = useGameStore((s) => s.resetGame);
 
   const isOnlineMode = useMultiplayerStore((s) => s.isOnlineMode);
   const onlinePlayers = useMultiplayerStore((s) => s.players);
   const connectionStatus = useMultiplayerStore((s) => s.connectionStatus);
   const errorMessage = useMultiplayerStore((s) => s.errorMessage);
   const broadcastState = useMultiplayerStore((s) => s.broadcastState);
+  const sendAction = useMultiplayerStore((s) => s.sendAction);
   const leaveRoom = useMultiplayerStore((s) => s.leaveRoom);
   const isReconnecting = useMultiplayerStore((s) => s.isReconnecting);
   const reconnect = useMultiplayerStore((s) => s.reconnect);
@@ -83,8 +85,8 @@ export const App: React.FC = () => {
         } else if (gameState.status === 'ended' && currentRoute === 'game') {
           setCurrentRoute('ending');
         }
-      } else if (!isGameStarted && currentRoute === 'game') {
-        // Game state was reset or cleared while in game: return to waiting room if connected, else home
+      } else if (!isGameStarted && (currentRoute === 'game' || currentRoute === 'ending')) {
+        // Game state was reset or cleared while in game or ending: return to waiting room if connected, else home
         setCurrentRoute(connectionStatus === 'connected' ? 'online-waiting' : 'home');
       }
     }
@@ -183,6 +185,7 @@ export const App: React.FC = () => {
     if (isOnlineMode) {
       leaveRoom();
     }
+    resetGame();
     setCurrentRoute('home');
   };
 
@@ -191,10 +194,15 @@ export const App: React.FC = () => {
   };
 
   const handlePlayAgain = () => {
-    if (isOnlineMode) {
-      setCurrentRoute('online-lobby');
-    } else {
+    if (!isOnlineMode) {
+      resetGame();
       setCurrentRoute('setup');
+      return;
+    }
+
+    if (multiplayerRole === 'host') {
+      sendAction({ action: 'RESET_GAME' });
+      setCurrentRoute('online-waiting');
     }
   };
 

@@ -5,6 +5,7 @@ import { Player } from '../src/types/player';
 import { useMultiplayerStore } from '../src/store/multiplayerStore';
 import { handleHostIncomingMessage, handleGuestIncomingMessage } from '../src/store/multiplayer/messageHandlers';
 import { executeHostAction } from '../src/store/multiplayer/actionHandlers';
+import { peerManager } from '../src/store/multiplayer/peerManager';
 import { OnlinePlayer } from '../src/types/multiplayer';
 import { trackEvent, resetSessionTimer, getSessionMetrics } from '../src/utils/analytics';
 
@@ -525,6 +526,67 @@ describe('Game State Semantics & Multiplayer Authority Suite', () => {
       trackEvent('first_card_flip', { cardId: 'ice-03' });
       const metricsAfterNewGame = getSessionMetrics();
       expect(metricsAfterNewGame.hasFirstCardFlipped).toBe(true);
+    });
+
+    it('synchronizes Play Again lifecycle across Host and Guest: RESET_GAME resets both states, preserves room and players', () => {
+      // 1. Setup online room with Host Alice and Guest Bob
+      const onlinePlayers: OnlinePlayer[] = [
+        { id: 'p1', name: 'Alice', isHost: true, peerId: 'peer_host', connectionStatus: 'connected' },
+        { id: 'p2', name: 'Bob', isHost: false, peerId: 'peer_guest', connectionStatus: 'connected' },
+      ];
+
+      useMultiplayerStore.setState({
+        isOnlineMode: true,
+        role: 'host',
+        roomCode: 'TEST99',
+        myPlayerId: 'p1',
+        players: onlinePlayers,
+        isGameStarted: true,
+      });
+
+      // Initialize game and end it
+      useGameStore.getState().initGame(twoPlayers, 'guided', null);
+      useGameStore.getState().endGame();
+      expect(useGameStore.getState().gameState?.status).toBe('ended');
+
+      // 2. Mock broadcast channel from peerManager
+      const sentMessages: any[] = [];
+      const broadcastSpy = vi.spyOn(peerManager, 'broadcastToGuests').mockImplementation((msg) => {
+        sentMessages.push(msg);
+      });
+
+      // 3. Host clicks Play Again -> executeHostAction with RESET_GAME
+      executeHostAction({ action: 'RESET_GAME' }, { actorPlayerId: 'p1', isHost: true });
+
+      // Host state verification:
+      expect(useGameStore.getState().gameState).toBeNull();
+      expect(useMultiplayerStore.getState().isGameStarted).toBe(false);
+      expect(useMultiplayerStore.getState().roomCode).toBe('TEST99');
+      expect(useMultiplayerStore.getState().players.length).toBe(2);
+
+      // Verify SESSION_RESET was broadcast
+      expect(sentMessages.some((m) => m.type === 'SESSION_RESET')).toBe(true);
+
+      // 4. Guest receives SESSION_RESET
+      useGameStore.getState().initGame(twoPlayers, 'guided', null);
+      useGameStore.getState().endGame();
+      useMultiplayerStore.setState({ isGameStarted: true });
+
+      handleGuestIncomingMessage(
+        {
+          type: 'SESSION_RESET',
+          senderId: 'p1',
+        },
+        { updateGuestState: vi.fn() }
+      );
+
+      // Guest state verification:
+      expect(useGameStore.getState().gameState).toBeNull();
+      expect(useMultiplayerStore.getState().isGameStarted).toBe(false);
+      expect(useMultiplayerStore.getState().roomCode).toBe('TEST99');
+      expect(useMultiplayerStore.getState().players.length).toBe(2);
+
+      broadcastSpy.mockRestore();
     });
   });
 });

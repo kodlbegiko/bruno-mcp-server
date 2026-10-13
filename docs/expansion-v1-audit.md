@@ -57,7 +57,7 @@
 ## 三、Conversation Engine 智慧對話弧線串接
 
 1. **題目多維元資料 (Metadata Enrichment)**：
-   - 全國 130 題（原版 70 ＋ 擴充 60）皆具備：
+   - 全數 130 題（原版 70 ＋ 擴充 60）皆具備：
      - `topic`：避免同主題連續出現（Topic anti-clumping）
      - `intensity` (1~5)：重度情感題後自動提供呼吸空間（Emotional breathing space）
      - `emotionalTone`：情緒色調交錯

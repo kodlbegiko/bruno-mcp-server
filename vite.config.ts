@@ -13,6 +13,7 @@ export default defineConfig({
         name: '深刻認識一個人',
         short_name: '深刻認識',
         description: '面對面進行的關係對話卡牌遊戲',
+        lang: 'zh-TW',
         theme_color: '#FBF9F5',
         background_color: '#FBF9F5',
         display: 'standalone',
